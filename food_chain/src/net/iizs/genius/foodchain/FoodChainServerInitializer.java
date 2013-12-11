@@ -12,7 +12,6 @@ public class FoodChainServerInitializer extends
 		ChannelInitializer<SocketChannel> {
     private static final StringDecoder DECODER = new StringDecoder();
     private static final StringEncoder ENCODER = new StringEncoder();
-    private static final FoodChainServerHandler SERVERHANDLER = new FoodChainServerHandler();
     
     @Override
     public void initChannel(SocketChannel ch) throws Exception {
@@ -26,7 +25,7 @@ public class FoodChainServerInitializer extends
         pipeline.addLast("encoder", ENCODER);
 
         // and then business logic.
-        pipeline.addLast("handler", SERVERHANDLER);
+        pipeline.addLast("handler", new FoodChainServerHandler());
     }
 
 }

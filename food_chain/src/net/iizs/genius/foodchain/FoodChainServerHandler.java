@@ -8,16 +8,13 @@ import java.util.logging.Logger;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
 
-@Sharable
 public class FoodChainServerHandler extends SimpleChannelInboundHandler<String> {
 
-
-	static final ChannelGroup channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+	static final ChannelGroup cgAllUsers = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 	
     private static final Logger logger = Logger.getLogger(FoodChainServerHandler.class.getName());
 
@@ -28,7 +25,7 @@ public class FoodChainServerHandler extends SimpleChannelInboundHandler<String> 
                 "Welcome to " + InetAddress.getLocalHost().getHostName() + "!\r\n");
         ctx.write("It is " + new Date() + " now.\r\n");
         ctx.flush();
-        channels.add(ctx.channel());
+        cgAllUsers.add(ctx.channel());
     }
 
     @Override
@@ -44,7 +41,7 @@ public class FoodChainServerHandler extends SimpleChannelInboundHandler<String> 
             close = true;
         } else {
             //response = "Did you say '" + request + "'?\r\n";
-            for (Channel c: channels) {
+            for (Channel c: cgAllUsers) {
                 if (c != ctx.channel()) {
                     c.writeAndFlush("[" + ctx.channel().remoteAddress() + "] " +
                             request + "\r\n");

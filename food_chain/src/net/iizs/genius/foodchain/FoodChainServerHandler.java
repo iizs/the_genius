@@ -17,7 +17,7 @@ import io.netty.util.concurrent.GlobalEventExecutor;
 public class FoodChainServerHandler extends SimpleChannelInboundHandler<String> {
 
 	static final String NEWLINE = "\r\n";
-	static final String LOBBY_USAGE_SIMPLE = "/nickname, /list, /join, /create, /bye";
+	static final String LOBBY_USAGE_SIMPLE = "/nickname [닉네임], /list, /join [방번호], /create, /bye";
 	static final String LOBBY_USAGE_DETAIL = "/nickname [닉네임]: 닉네임 변경, /list: 게임방 목록, /join [방번호]: 게임방 입장, /create: 게임방 생성, /bye: 종료";
 	
 	static final ChannelGroup cgAllUsers = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
@@ -42,7 +42,7 @@ public class FoodChainServerHandler extends SimpleChannelInboundHandler<String> 
         
         myGame = null;
         nickname = ctx.channel().remoteAddress().toString();
-        lobbyBroadcast( "[" + nickname + "]님이 로비에 입장했습니다" + NEWLINE );
+        lobbyBroadcast( "[" + nickname + "]님이 로비에 들어왔습니다" + NEWLINE );
     }
     
     @Override
@@ -51,7 +51,7 @@ public class FoodChainServerHandler extends SimpleChannelInboundHandler<String> 
 		if ( myGame == null ) {
 			lobbyBroadcast("[" + nickname + "]님이 로비에서 나갔습니다." + NEWLINE);
 		} else {
-			// TODO 게임방 접속 종료 메시지
+			myGame.quit(nickname);
 		}
 	}
 
@@ -77,14 +77,10 @@ public class FoodChainServerHandler extends SimpleChannelInboundHandler<String> 
     	GameRoom room = allGameRooms.get(key);
     	
     	if ( room == null ) {
-    		// TODO throw exception
+    		throw new GeniusServerException(key + "번 게임방은 존재하지 않습니다.");
     	}
     	
-    	if ( room.isJoinable() == false ) {
-    		// TODO throw exception
-    	}
-    	
-    	// TODO join gameroom
+    	room.join(nickname, ctx);
     	myGame = room;
     	cgLobby.remove( ctx.channel() );
     	lobbyBroadcast("[" + nickname + "]님이 " + key + "번 게임방에 들어갔습니다." + NEWLINE);
@@ -92,18 +88,19 @@ public class FoodChainServerHandler extends SimpleChannelInboundHandler<String> 
     
     private void createGameRoom(ChannelHandlerContext ctx) throws Exception {
     	int i = 1;
-    	GameRoom room = new WaitingGameRoom();
+    	GameRoom room = new GameRoom();
     	
     	while ( allGameRooms.putIfAbsent( Integer.toString(i), room ) != null ) {
     		++i;
     	}
+    	room.setName( Integer.toString(i) );
     	
     	joinGameRoom( ctx, Integer.toString(i) );
     }
        
     private void lobbyBroadcast(String msg) {
         for (Channel c: cgLobby) {
-        	c.writeAndFlush(msg + NEWLINE);
+        	c.writeAndFlush( "===== " + msg + " =====" + NEWLINE);
         }
     }
     
@@ -140,54 +137,46 @@ public class FoodChainServerHandler extends SimpleChannelInboundHandler<String> 
     		} else {
 	    		if ( request.charAt(0) == '/' ) {
 	    			// 로비 명령어
-	    			lobbyCommand(ctx, request);
+	    			try {
+	    				lobbyCommand(ctx, request);
+	    			} catch ( GeniusServerException e ) {
+	    				ctx.channel().writeAndFlush( e.getMessage() + NEWLINE );
+	    			}
 	    		} else {
 	    			// 로비 채팅
 	                for (Channel c: cgLobby) {
+	                	c.writeAndFlush("[" + nickname + "] " + request + NEWLINE);
+	                	/*
 	                    if (c != ctx.channel()) {
 	                        c.writeAndFlush("[" + nickname + "] " + request + NEWLINE);
 	                    } else {
 	                        c.writeAndFlush("[" + nickname + "] " + request + NEWLINE);
 	                    }
+	                    */
 	                }
 	    		}
     		}
     	} else {
     		if ( request.isEmpty() ) {
     			// 게임방 도움말
+    			myGame.printUsageSimple(nickname);
     		} else {
 	    		if ( request.charAt(0) == '/' ) {
 	    			// 게임방 명령어
+	    			try {
+	    				myGame.userCommand(nickname, request);
+	    			} catch ( QuitGameRoomException q ) {
+	    				cgLobby.add(ctx.channel());
+	    				lobbyBroadcast( "[" + nickname + "]님이 로비에 들어왔습니다" + NEWLINE );
+	    			} catch ( GeniusServerException e ) {
+	    				ctx.channel().writeAndFlush( e.getMessage() + NEWLINE );
+	    			}
 	    		} else {
 	    			// 게임방 채팅
+	    			myGame.chat( nickname, request );
 	    		}
     		}
     	}
-        // Generate and write a response.
-    	/*
-        String response;
-        boolean close = false;
-        if (request.isEmpty()) {
-            response = "Please type something.\r\n";
-        } else {
-        	if ( myGame == null );
-            //response = "Did you say '" + request + "'?\r\n";
-            for (Channel c: cgLobby) {
-                if (c != ctx.channel()) {
-                    c.writeAndFlush("[" + ctx.channel().remoteAddress() + "] " +
-                            request + "\r\n");
-                } else {
-                    c.writeAndFlush("[you] " + request + "\r\n");
-                }
-            }
-        }
-        */
-
-        /*
-        if ("bye".equals(request.toLowerCase())) {
-            ctx.close();
-        }
-        */
     }
 
     @Override

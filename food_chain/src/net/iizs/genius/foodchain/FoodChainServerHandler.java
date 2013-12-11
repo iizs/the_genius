@@ -106,7 +106,7 @@ public class FoodChainServerHandler extends SimpleChannelInboundHandler<String> 
     	String cmds[] = request.split("\\s+");
     	String cmd = cmds[0].toLowerCase();
     	
-    	if ( cmd.equals("/nickname") ) {
+    	if ( cmd.equals("/nickname") || cmd.equals("/nick") ) {
     		setNickname( ctx, cmds[1] );
     	} else if ( cmd.equals("/list") ) {
     		listGameRooms(ctx);
@@ -125,6 +125,16 @@ public class FoodChainServerHandler extends SimpleChannelInboundHandler<String> 
     	ctx.channel().writeAndFlush(LOBBY_USAGE_SIMPLE + NEWLINE);
     }
 
+    public static String stringToHex(String s) {
+        String result = "";
+
+        for (int i = 0; i < s.length(); i++) {
+          result += String.format("%02X ", (int) s.charAt(i));
+        }
+
+        return result;
+      }
+    
     @Override
     public void channelRead0(ChannelHandlerContext ctx, String request) throws Exception {
 

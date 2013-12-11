@@ -28,5 +28,9 @@ public class Player {
 	public Channel getChannel() {
 		return channel;
 	}
+	
+	public String getNickname() {
+		return nickname;
+	}
 
 }

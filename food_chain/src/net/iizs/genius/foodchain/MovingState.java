@@ -54,7 +54,7 @@ public class MovingState extends AbstractGameRoomState {
 				broadcast( "[" + p.getNickname() + "]님은 '" + p.getMoves().get( round_ - 1 ).getName() + "'으로 이동했습니다.");
 			}
 			
-			return new AttackState(this);
+			return new AttackingState(this);
 		}
 		
 		return this;

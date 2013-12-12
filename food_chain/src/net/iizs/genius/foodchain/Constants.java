@@ -11,4 +11,5 @@ public interface Constants {
 	
 	static final long ONE_DAY_MILLI = 24 * 60 * 60 * 1000; 
 	static final int MAX_GAME_ROUND = 4;
+	static final int ATTACK_TIME_LIMIT_SECOND = 3 * 60;
 }

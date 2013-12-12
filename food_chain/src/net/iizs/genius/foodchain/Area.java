@@ -12,4 +12,14 @@ public enum Area {
 	}
 	
 	public String getName() { return name_; }
+	
+	public static Area getAreaOf(String name) throws Exception {
+		for ( Area a: Area.values() ) {
+			if ( name.equals(a.getName()) ) {
+				return a;
+			}
+		}
+		
+		throw new GeniusServerException("'" + name + "'이라는 이름의 지역은 없습니다.");
+	}
 }

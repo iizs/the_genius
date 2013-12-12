@@ -11,11 +11,10 @@ import static net.iizs.genius.foodchain.Constants.*;
 
 public class InitState extends AbstractGameRoomState {
 
-	public InitState() {
-	}
-
 	public InitState(AbstractGameRoomState cl) {
 		super(cl);
+		
+		round_ = 0;
 		
 		List<Character> chars = Arrays.asList( Character.values() );
 		Collections.shuffle( chars );
@@ -24,6 +23,8 @@ public class InitState extends AbstractGameRoomState {
 		for ( int i=0; i < chars.size(); ++i ) {
 			Player p = players.get(i);
 			Character c = chars.get(i);
+			
+			p.reset();
 			p.setCharacter( c );
 			
 			if ( ! p.isBot() ) {
@@ -36,11 +37,11 @@ public class InitState extends AbstractGameRoomState {
 			}
 		}
 		
-		broadcast("각 플레이어들은 /peep [닉네임] 명령으로 엿보기를 실행해 주세요.");
+		broadcast("각 플레이어들은 /peep [닉네임] 명령으로 엿보기를 실행해주세요.");
 		broadcast("2회 엿보기가 가능한 플레이어들은 /peep 명령을 두 번 실행하시면 됩니다.");
 		broadcast("'까마귀'는 /select [동물이름] 명령으로 우승자를 지목해 주세요.");
-		broadcast("'카멜레온'은 /select [동물이름] 명령으로 위장할 동물을 선택해 주세요.");
-		broadcast("엿보기 결과는 모든 플레이어가 각자의 명령을 실행한 다음 동시에 공개 됩니다.");
+		broadcast("'카멜레온'은 /select [동물이름] 명령으로 위장할 동물을 선택해주세요.");
+		broadcast("엿보기 결과는 모든 플레이어가 각자의 명령을 실행한 다음 동시에 공개됩니다.");
 		
 	}
 	
@@ -94,7 +95,7 @@ public class InitState extends AbstractGameRoomState {
 				}
 			}
 			
-			// TODO next state
+			return new MovingState(this);
 		}
 		return this;
 	}
@@ -151,7 +152,6 @@ public class InitState extends AbstractGameRoomState {
 	@Override
 	public void printUsageSimple(String nickname) throws Exception {
 		getPlayer(nickname).getChannel().writeAndFlush(INIT_USAGE_SIMPLE + NEWLINE);
-
 	}
 
 	@Override

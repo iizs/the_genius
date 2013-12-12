@@ -14,6 +14,7 @@ public abstract class AbstractGameRoomState {
 	protected ChannelGroup cgAllPlayers_;
 	protected ConcurrentMap<String, Player> players_;
 	protected String name_;
+	protected int round_;
 	
 	public AbstractGameRoomState() {
 		name_ = "";
@@ -25,6 +26,7 @@ public abstract class AbstractGameRoomState {
 		name_ = c.name_;
 		cgAllPlayers_ = c.cgAllPlayers_;
 		players_ = c.players_;
+		round_ = c.round_;
 	}
 	
 	protected Player getPlayer(String nickname) throws Exception {

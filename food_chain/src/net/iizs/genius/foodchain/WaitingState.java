@@ -5,7 +5,6 @@ import static net.iizs.genius.foodchain.Constants.*;
 import java.util.Iterator;
 import java.util.Set;
 
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 
 public class WaitingState extends AbstractGameRoomState {
@@ -20,26 +19,26 @@ public class WaitingState extends AbstractGameRoomState {
 	
 	public void join(String nickname, ChannelHandlerContext ctx) throws Exception {		
 		Player p = new Player( nickname, ctx.channel() );
-		if ( players.putIfAbsent( nickname, p ) != null ) {
-			throw new GeniusServerException( name + "번 게임방에 들어갈 수 없습니다; 같은 이름의 플레이어가 존재합니다." );
+		if ( players_.putIfAbsent( nickname, p ) != null ) {
+			throw new GeniusServerException( name_ + "번 게임방에 들어갈 수 없습니다; 같은 이름의 플레이어가 존재합니다." );
 		}
-		cgAllPlayers.add( ctx.channel() );
+		cgAllPlayers_.add( ctx.channel() );
 		broadcast( "[" + nickname + "]님이 들어왔습니다." );		
 	}
 	
 	public void quit(String nickname) throws Exception {
 		Player p = getPlayer(nickname);
 		
-		cgAllPlayers.remove( p.getChannel() );
+		cgAllPlayers_.remove( p.getChannel() );
 		broadcast("[" + nickname + "]님이 나갔습니다.");
 	
 		// 깨끗하게 퇴장
-		players.remove( nickname );
+		players_.remove( nickname );
 	}
 	
 	private void addBot(String botName) throws Exception {
 		Player p = new Player( botName );
-		if ( players.putIfAbsent( botName, p ) != null ) {
+		if ( players_.putIfAbsent( botName, p ) != null ) {
 			throw new GeniusServerException( "봇을 생성할 수 없습니다; 같은 이름의 플레이어가 존재합니다." );
 		}
 		broadcast("봇 [" + botName + "]이 생성되었습니다.");
@@ -48,10 +47,10 @@ public class WaitingState extends AbstractGameRoomState {
 	public void showInfo(String nickname) throws Exception {
 		Player p = getPlayer(nickname);
 		
-		p.getChannel().write( "> 방 번호: " + name + NEWLINE );
+		p.getChannel().write( "> 방 번호: " + name_ + NEWLINE );
 		p.getChannel().write( "> 플레이어" + NEWLINE );
 		
-    	Set<String> playerNames = players.keySet();
+    	Set<String> playerNames = players_.keySet();
     	Iterator<String> iter = playerNames.iterator();
     	while ( iter.hasNext() ) {    		
     		Player i = getPlayer(iter.next());
@@ -79,6 +78,7 @@ public class WaitingState extends AbstractGameRoomState {
     		showInfo( nickname );
     	} else if ( cmd.equals("/start") ) {
     		//TODO impl
+    		//if ( players.size() <  )
     		throw new GeniusServerException("Not implemented yet");
     	} else if ( cmd.equals("/add_bot") ) {    		
     		String botName;

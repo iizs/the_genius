@@ -18,14 +18,14 @@ import static net.iizs.genius.foodchain.Constants.*;
 
 public class FoodChainServerHandler extends SimpleChannelInboundHandler<String> {
 
-	static final ChannelGroup cgAllUsers = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
-	static final ChannelGroup cgLobby = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
-	static final ConcurrentMap<String, GameRoom> allGameRooms = new ConcurrentHashMap<>();
+	static final ChannelGroup cgAllUsers_ = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+	static final ChannelGroup cgLobby_ = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+	static final ConcurrentMap<String, GameRoom> allGameRooms_ = new ConcurrentHashMap<>();
 	
-	GameRoom myGame = null;
-	String nickname;
+	GameRoom myGame_ = null;
+	String nickname_;
 	
-    private static final Logger logger = Logger.getLogger(FoodChainServerHandler.class.getName());
+    private static final Logger logger_ = Logger.getLogger(FoodChainServerHandler.class.getName());
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -35,35 +35,35 @@ public class FoodChainServerHandler extends SimpleChannelInboundHandler<String> 
         //ctx.write("It is " + new Date() + " now.\r\n");
         ctx.flush();
         
-        cgAllUsers.add(ctx.channel());
-        cgLobby.add(ctx.channel());
+        cgAllUsers_.add(ctx.channel());
+        cgLobby_.add(ctx.channel());
         
-        myGame = null;
-        nickname = ctx.channel().remoteAddress().toString();
-        lobbyBroadcast( "[" + nickname + "]님이 로비에 들어왔습니다" );
+        myGame_ = null;
+        nickname_ = ctx.channel().remoteAddress().toString();
+        lobbyBroadcast( "[" + nickname_ + "]님이 로비에 들어왔습니다" );
         
-        logger.info("[" + nickname + "] logged in");
+        logger_.info("[" + nickname_ + "] logged in");
     }
     
     @Override
 	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 		super.channelInactive(ctx);
-		if ( myGame == null ) {
-			lobbyBroadcast("[" + nickname + "]님이 로비에서 나갔습니다.");
+		if ( myGame_ == null ) {
+			lobbyBroadcast("[" + nickname_ + "]님이 로비에서 나갔습니다.");
 		} else {
-			myGame.quit(nickname);
+			myGame_.quit(nickname_);
 		}
-		logger.info("[" + nickname + "] disconnected");
+		logger_.info("[" + nickname_ + "] disconnected");
 	}
 
 	private void setNickname(ChannelHandlerContext ctx, String request) throws Exception {
-    	String old = nickname;
-    	nickname = request;
-    	lobbyBroadcast("[" + old + "]님이 닉네임을 [" + nickname + "]으로 변경했습니다.");
+    	String old = nickname_;
+    	nickname_ = request;
+    	lobbyBroadcast("[" + old + "]님이 닉네임을 [" + nickname_ + "]으로 변경했습니다.");
     }
     
     private void listGameRooms(ChannelHandlerContext ctx) throws Exception {
-    	Set<String> roomnames = allGameRooms.keySet();
+    	Set<String> roomnames = allGameRooms_.keySet();
     	Iterator<String> iter = roomnames.iterator();
     	while ( iter.hasNext() ) {
     		String name = iter.next();
@@ -75,23 +75,23 @@ public class FoodChainServerHandler extends SimpleChannelInboundHandler<String> 
     }
     
     private void joinGameRoom(ChannelHandlerContext ctx, String key) throws Exception {
-    	GameRoom room = allGameRooms.get(key);
+    	GameRoom room = allGameRooms_.get(key);
     	
     	if ( room == null ) {
     		throw new GeniusServerException(key + "번 게임방은 존재하지 않습니다.");
     	}
     	
-    	room.join(nickname, ctx);
-    	myGame = room;
-    	cgLobby.remove( ctx.channel() );
-    	lobbyBroadcast("[" + nickname + "]님이 " + key + "번 게임방에 들어갔습니다.");
+    	room.join(nickname_, ctx);
+    	myGame_ = room;
+    	cgLobby_.remove( ctx.channel() );
+    	lobbyBroadcast("[" + nickname_ + "]님이 " + key + "번 게임방에 들어갔습니다.");
     }
     
     private void createGameRoom(ChannelHandlerContext ctx) throws Exception {
     	int i = 1;
     	GameRoom room = new GameRoom();
     	
-    	while ( allGameRooms.putIfAbsent( Integer.toString(i), room ) != null ) {
+    	while ( allGameRooms_.putIfAbsent( Integer.toString(i), room ) != null ) {
     		++i;
     	}
     	room.setName( Integer.toString(i) );
@@ -100,7 +100,7 @@ public class FoodChainServerHandler extends SimpleChannelInboundHandler<String> 
     }
        
     private void lobbyBroadcast(String msg) {
-        for (Channel c: cgLobby) {
+        for (Channel c: cgLobby_) {
         	c.writeAndFlush( "===== " + msg + " =====" + NEWLINE);
         }
     }
@@ -109,7 +109,7 @@ public class FoodChainServerHandler extends SimpleChannelInboundHandler<String> 
     	String cmds[] = request.split("\\s+");
     	String cmd = cmds[0].toLowerCase();
     	
-    	logger.info("[" + nickname + "] " + request);
+    	logger_.info("[" + nickname_ + "] " + request);
     	
     	if ( cmd.equals("/nickname") || cmd.equals("/nick") ) {
     		setNickname( ctx, cmds[1] );
@@ -143,7 +143,7 @@ public class FoodChainServerHandler extends SimpleChannelInboundHandler<String> 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, String request) throws Exception {
 
-    	if( myGame == null ) {
+    	if( myGame_ == null ) {
     		if ( request.isEmpty() ) {
     			// 로비 도움말
     			lobbyUsageSimple(ctx);
@@ -157,8 +157,8 @@ public class FoodChainServerHandler extends SimpleChannelInboundHandler<String> 
 	    			}
 	    		} else {
 	    			// 로비 채팅
-	                for (Channel c: cgLobby) {
-	                	c.writeAndFlush("[" + nickname + "] " + request + NEWLINE);
+	                for (Channel c: cgLobby_) {
+	                	c.writeAndFlush("[" + nickname_ + "] " + request + NEWLINE);
 	                	/*
 	                    if (c != ctx.channel()) {
 	                        c.writeAndFlush("[" + nickname + "] " + request + NEWLINE);
@@ -172,23 +172,23 @@ public class FoodChainServerHandler extends SimpleChannelInboundHandler<String> 
     	} else {
     		if ( request.isEmpty() ) {
     			// 게임방 도움말
-    			myGame.printUsageSimple(nickname);
+    			myGame_.printUsageSimple(nickname_);
     		} else {
 	    		if ( request.charAt(0) == '/' ) {
 	    			// 게임방 명령어
 	    			try {
-	    				logger.info("[" + nickname + "]@" + myGame.getName() + " " + request);
-	    				myGame.userCommand(nickname, request);
+	    				logger_.info("[" + nickname_ + "]@" + myGame_.getName() + " " + request);
+	    				myGame_.userCommand(nickname_, request);
 	    			} catch ( QuitGameRoomException q ) {
-	    				myGame = null;
-	    				cgLobby.add(ctx.channel());
-	    				lobbyBroadcast( "[" + nickname + "]님이 로비에 들어왔습니다" );
+	    				myGame_ = null;
+	    				cgLobby_.add(ctx.channel());
+	    				lobbyBroadcast( "[" + nickname_ + "]님이 로비에 들어왔습니다" );
 	    			} catch ( GeniusServerException e ) {
 	    				ctx.channel().writeAndFlush( e.getMessage() + NEWLINE );
 	    			}
 	    		} else {
 	    			// 게임방 채팅
-	    			myGame.chat( nickname, request );
+	    			myGame_.chat( nickname_, request );
 	    		}
     		}
     	}
@@ -201,7 +201,7 @@ public class FoodChainServerHandler extends SimpleChannelInboundHandler<String> 
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        logger.log(
+        logger_.log(
                 Level.WARNING,
                 "Unexpected exception from downstream.", cause);
         ctx.close();

@@ -11,24 +11,24 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 public abstract class AbstractGameRoomState {
-	protected ChannelGroup cgAllPlayers;
-	protected ConcurrentMap<String, Player> players;
-	protected String name;
+	protected ChannelGroup cgAllPlayers_;
+	protected ConcurrentMap<String, Player> players_;
+	protected String name_;
 	
 	public AbstractGameRoomState() {
-		name = "";
-		cgAllPlayers = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
-		players = new ConcurrentHashMap<>();
+		name_ = "";
+		cgAllPlayers_ = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+		players_ = new ConcurrentHashMap<>();
 	}
 	
 	public AbstractGameRoomState(AbstractGameRoomState c) {
-		name = c.name;
-		cgAllPlayers = c.cgAllPlayers;
-		players = c.players;
+		name_ = c.name_;
+		cgAllPlayers_ = c.cgAllPlayers_;
+		players_ = c.players_;
 	}
 	
 	protected Player getPlayer(String nickname) throws Exception {
-		Player p = players.get(nickname);
+		Player p = players_.get(nickname);
 		if ( p == null ) {
 			throw new GeniusServerException("[" + nickname + "]님은 존재하지 않습니다.");
 		}
@@ -36,21 +36,21 @@ public abstract class AbstractGameRoomState {
 	}
 	
 	public void setName(String n) {
-		name = n;
+		name_ = n;
 	}
 
 	public String getName() {
-		return name;
+		return name_;
 	}
 	
 	public void broadcast(String msg) {
-        for (Channel c: cgAllPlayers) {
+        for (Channel c: cgAllPlayers_) {
         	c.writeAndFlush( "===== " + msg + " =====" + NEWLINE);
         }
 	}
 	
 	public void chat(String nickname, String msg) {
-        for (Channel c: cgAllPlayers) {
+        for (Channel c: cgAllPlayers_) {
         	c.writeAndFlush("[" + nickname + "] " + msg + NEWLINE);
         }
 	}
@@ -68,13 +68,13 @@ public abstract class AbstractGameRoomState {
 	}
 	
 	public void join(String nickname, ChannelHandlerContext ctx) throws Exception {
-		throw new GeniusServerException( name + "번 게임방에 들어갈 수 없습니다; 게임이 진행중입니다." );
+		throw new GeniusServerException( name_ + "번 게임방에 들어갈 수 없습니다; 게임이 진행중입니다." );
 	}
 	
 	public void quit(String nickname) throws Exception {
 		Player p = getPlayer(nickname);
 		
-		cgAllPlayers.remove( p.getChannel() );
+		cgAllPlayers_.remove( p.getChannel() );
 		broadcast("[" + nickname + "]님이 나갔습니다.");
 		
 		p.becomeBot();

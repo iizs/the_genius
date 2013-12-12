@@ -3,34 +3,34 @@ package net.iizs.genius.foodchain;
 import io.netty.channel.Channel;
 
 public class Player {
-	private String nickname;
-	private Channel channel;
+	private String nickname_;
+	private Channel channel_;
 	
 	public Player(String n, Channel c) {
-		nickname = n;
-		channel = c;
+		nickname_ = n;
+		channel_ = c;
 	}
 	
 	public Player(String n) {
 		// bot player
-		nickname = n;
-		channel = null;
+		nickname_ = n;
+		channel_ = null;
 	}
 	
 	public boolean isBot() {
-		return ( channel == null );
+		return ( channel_ == null );
 	}
 	
 	public void becomeBot() {
-		channel = null;
+		channel_ = null;
 	}
 	
 	public Channel getChannel() {
-		return channel;
+		return channel_;
 	}
 	
 	public String getNickname() {
-		return nickname;
+		return nickname_;
 	}
 
 }

@@ -6,6 +6,7 @@ public class WaitingState extends GameRoomState {
 	private GameRoom room;
 	
 	public WaitingState(GameRoom r) {
+		// comment
 		room = r;
 	}
 

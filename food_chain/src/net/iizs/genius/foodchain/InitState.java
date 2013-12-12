@@ -3,6 +3,7 @@ package net.iizs.genius.foodchain;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -15,6 +16,10 @@ public class InitState extends AbstractGameRoomState {
 		super(cl);
 		
 		round_ = 0;
+		minimap_ = new HashMap<>();
+		for ( Area a : Area.values() ) {
+			minimap_.put(a, new ArrayList<Player>());
+		}
 		
 		List<Character> chars = Arrays.asList( Character.values() );
 		Collections.shuffle( chars );
@@ -26,6 +31,8 @@ public class InitState extends AbstractGameRoomState {
 			
 			p.reset();
 			p.setCharacter( c );
+			p.setCurrentArea( Area.HALL );
+			minimap_.get( Area.HALL ).add(p);
 			
 			if ( ! p.isBot() ) {
 				p.getChannel().writeAndFlush(">>> 당신은 '" + c.getName() + "' 입니다." + NEWLINE );

@@ -16,6 +16,8 @@ public class Player {
 	private Character selection_; // 까마귀, 카멜레온의 선택
 	private Set<String> peeps_;
 	private List<Area> movingHistory_;
+	private Area currentArea_;
+	private boolean agreedToProceed_;
 	
 	public Player(String n, Channel c) {
 		nickname_ = n;
@@ -102,5 +104,26 @@ public class Player {
 	
 	public boolean isAlive() {
 		return alive_;
+	}
+	
+	public void setCurrentArea(Area a) {
+		currentArea_ = a;
+	}
+	
+	public Area getCurrentArea() {
+		return currentArea_;
+	}
+
+	@Override
+	public String toString() {
+		return nickname_;
+	}	
+	
+	public void setAgreeToProceed(boolean b) {
+		agreedToProceed_ = b;
+	}
+	
+	public boolean getAgreeToProceed() {
+		return agreedToProceed_;
 	}
 }

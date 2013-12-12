@@ -4,7 +4,8 @@ public enum Area {
 	PLAINS("들"),
 	WOODS("숲"),
 	SKY("하늘"),
-	RIVER("강");
+	RIVER("강"),
+	HALL("홀");
 	
 	private final String name_;
 	private Area(String n) {
@@ -22,4 +23,10 @@ public enum Area {
 		
 		throw new GeniusServerException("'" + name + "'이라는 이름의 지역은 없습니다.");
 	}
+
+	@Override
+	public String toString() {
+		return name_;
+	}
+	
 }

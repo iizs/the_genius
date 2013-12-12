@@ -9,6 +9,14 @@ import io.netty.channel.ChannelHandlerContext;
 
 public class WaitingState extends AbstractGameRoomState {
 
+	public WaitingState() {
+		super();
+	}
+
+	public WaitingState(AbstractGameRoomState c) {
+		super(c);
+	}
+
 	public void userCommand(String nickname, String[] cmds) throws Exception {
 		printUsageSimple(nickname);
 	}

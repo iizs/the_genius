@@ -7,6 +7,8 @@ import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
 
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -15,6 +17,7 @@ public abstract class AbstractGameRoomState {
 	protected ConcurrentMap<String, Player> players_;
 	protected String name_;
 	protected int round_;
+	protected Map<Area,List<Player>> minimap_;
 	
 	public AbstractGameRoomState() {
 		name_ = "";
@@ -27,6 +30,7 @@ public abstract class AbstractGameRoomState {
 		cgAllPlayers_ = c.cgAllPlayers_;
 		players_ = c.players_;
 		round_ = c.round_;
+		minimap_ = c.minimap_;
 	}
 	
 	protected Player getPlayer(String nickname) throws Exception {
@@ -47,11 +51,11 @@ public abstract class AbstractGameRoomState {
 	
 	public void broadcast(String msg) {
         for (Channel c: cgAllPlayers_) {
-        	c.writeAndFlush( "===== " + msg + " =====" + NEWLINE);
+        	c.writeAndFlush( "===== " + msg + NEWLINE);
         }
 	}
 	
-	public void chat(String nickname, String msg) {
+	public void chat(String nickname, String msg) throws Exception {
         for (Channel c: cgAllPlayers_) {
         	c.writeAndFlush("[" + nickname + "] " + msg + NEWLINE);
         }

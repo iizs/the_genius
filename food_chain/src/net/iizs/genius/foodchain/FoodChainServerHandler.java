@@ -188,7 +188,11 @@ public class FoodChainServerHandler extends SimpleChannelInboundHandler<String> 
 	    			}
 	    		} else {
 	    			// 게임방 채팅
-	    			myGame_.chat( nickname_, request );
+	    			try {
+	    				myGame_.chat( nickname_, request );
+	    			} catch ( GeniusServerException e ) {
+	    				ctx.channel().writeAndFlush( e.getMessage() + NEWLINE );
+	    			}
 	    		}
     		}
     	}

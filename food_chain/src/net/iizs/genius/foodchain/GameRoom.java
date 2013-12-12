@@ -26,7 +26,7 @@ public class GameRoom {
 		state_.broadcast(msg);
 	}
 	
-	public void chat(String nickname, String msg) {
+	public void chat(String nickname, String msg) throws Exception {
 		state_.chat(nickname, msg);
 	}
 	

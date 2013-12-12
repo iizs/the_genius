@@ -10,4 +10,6 @@ public enum Area {
 	private Area(String n) {
 		name_ = n;
 	}
+	
+	public String getName() { return name_; }
 }

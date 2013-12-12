@@ -5,6 +5,7 @@ import io.netty.channel.Channel;
 public class Player {
 	private String nickname_;
 	private Channel channel_;
+	private Character character_;
 	
 	public Player(String n, Channel c) {
 		nickname_ = n;
@@ -31,6 +32,14 @@ public class Player {
 	
 	public String getNickname() {
 		return nickname_;
+	}
+	
+	public void setCharacter(Character c) {
+		character_ = c;
+	}
+	
+	public Character getCharacter() {
+		return character_;
 	}
 
 }

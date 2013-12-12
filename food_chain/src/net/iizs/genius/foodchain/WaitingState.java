@@ -44,6 +44,16 @@ public class WaitingState extends AbstractGameRoomState {
 		broadcast("봇 [" + botName + "]이 생성되었습니다.");
 	}
 	
+	private void removeBot() throws Exception {
+		for ( Player p: players_.values() ) {
+			if ( p.isBot() ) {
+				players_.remove(p.getNickname());
+				broadcast("봇 [" + p.getNickname() + "]이 제거되었습니다.");
+				break;
+			}
+		}
+	}
+	
 	public void showInfo(String nickname) throws Exception {
 		Player p = getPlayer(nickname);
 		
@@ -65,7 +75,7 @@ public class WaitingState extends AbstractGameRoomState {
     	p.getChannel().flush();
 	}
 	
-	public void userCommand(String nickname, String req) throws Exception {
+	public AbstractGameRoomState userCommand(String nickname, String req) throws Exception {
     	String cmds[] = req.split("\\s+", 3);
     	String cmd = cmds[0].toLowerCase();
     	
@@ -77,9 +87,10 @@ public class WaitingState extends AbstractGameRoomState {
     	} else if ( cmd.equals("/info") ) {
     		showInfo( nickname );
     	} else if ( cmd.equals("/start") ) {
-    		//TODO impl
-    		//if ( players.size() <  )
-    		throw new GeniusServerException("Not implemented yet");
+    		if ( players_.size() < Character.values().length ) {
+    			throw new GeniusServerException("참가자가 부족합니다. 봇을 추가하거나, 다른 플레이어의 입장을 기다려주세요.");
+    		}
+    		return new InitState(this);
     	} else if ( cmd.equals("/add_bot") ) {    		
     		String botName;
     		try {
@@ -89,9 +100,13 @@ public class WaitingState extends AbstractGameRoomState {
     			botName = nickname + "_" + Long.toString(appendix); 
     		}    		
     		addBot( botName );
+    	} else if ( cmd.equals("/del_bot") ) {
+    		removeBot();
     	} else {
     		printUsageSimple(nickname);
     	}
+    	
+    	return this;
 	}
 	
 

@@ -35,7 +35,7 @@ public class GameRoom {
 	}
 	
 	public void userCommand(String nickname, String req) throws Exception {
-    	state_.userCommand(nickname, req);
+    	state_ = state_.userCommand(nickname, req);
 	}
 
 	public void printUsageSimple(String nickname) throws Exception {

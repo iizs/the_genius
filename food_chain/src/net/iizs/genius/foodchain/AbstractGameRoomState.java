@@ -81,7 +81,7 @@ public abstract class AbstractGameRoomState {
 		broadcast("[" + nickname + "]님을 대신해서 봇이 게임을 진행합니다.");
 	}
 	
-	public abstract void userCommand(String nickname, String req) throws Exception;
+	public abstract AbstractGameRoomState userCommand(String nickname, String req) throws Exception;
 	public abstract void printUsageSimple(String nickname) throws Exception;
 	public abstract void showInfo(String nickname) throws Exception;
 

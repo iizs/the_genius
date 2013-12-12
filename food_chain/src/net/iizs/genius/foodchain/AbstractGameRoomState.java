@@ -38,6 +38,10 @@ public abstract class AbstractGameRoomState {
 	public void setName(String n) {
 		name = n;
 	}
+
+	public String getName() {
+		return name;
+	}
 	
 	public void broadcast(String msg) {
         for (Channel c: cgAllPlayers) {
@@ -80,4 +84,5 @@ public abstract class AbstractGameRoomState {
 	public abstract void userCommand(String nickname, String req) throws Exception;
 	public abstract void printUsageSimple(String nickname) throws Exception;
 	public abstract void showInfo(String nickname) throws Exception;
+
 }

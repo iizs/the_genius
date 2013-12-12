@@ -14,6 +14,10 @@ public class GameRoom {
 		state.setName(n);
 	}
 	
+	public String getName() {
+		return state.getName();
+	}
+	
 	public void join(String nickname, ChannelHandlerContext ctx) throws Exception {
 		state.join(nickname, ctx);
 	}
@@ -24,10 +28,6 @@ public class GameRoom {
 	
 	public void chat(String nickname, String msg) {
 		state.chat(nickname, msg);
-	}
-	
-	public void whisper(String nickname, String to, String msg) throws Exception {
-		state.whisper(nickname, to, msg);
 	}
 	
 	public void quit(String nickname) throws Exception {

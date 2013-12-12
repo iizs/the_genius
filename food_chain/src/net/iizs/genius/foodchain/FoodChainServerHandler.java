@@ -41,6 +41,8 @@ public class FoodChainServerHandler extends SimpleChannelInboundHandler<String> 
         myGame = null;
         nickname = ctx.channel().remoteAddress().toString();
         lobbyBroadcast( "[" + nickname + "]님이 로비에 들어왔습니다" );
+        
+        logger.info("[" + nickname + "] logged in");
     }
     
     @Override
@@ -51,6 +53,7 @@ public class FoodChainServerHandler extends SimpleChannelInboundHandler<String> 
 		} else {
 			myGame.quit(nickname);
 		}
+		logger.info("[" + nickname + "] disconnected");
 	}
 
 	private void setNickname(ChannelHandlerContext ctx, String request) throws Exception {
@@ -105,6 +108,8 @@ public class FoodChainServerHandler extends SimpleChannelInboundHandler<String> 
     private void lobbyCommand(ChannelHandlerContext ctx, String request) throws Exception {
     	String cmds[] = request.split("\\s+");
     	String cmd = cmds[0].toLowerCase();
+    	
+    	logger.info("[" + nickname + "] " + request);
     	
     	if ( cmd.equals("/nickname") || cmd.equals("/nick") ) {
     		setNickname( ctx, cmds[1] );
@@ -172,6 +177,7 @@ public class FoodChainServerHandler extends SimpleChannelInboundHandler<String> 
 	    		if ( request.charAt(0) == '/' ) {
 	    			// 게임방 명령어
 	    			try {
+	    				logger.info("[" + nickname + "]@" + myGame.getName() + " " + request);
 	    				myGame.userCommand(nickname, request);
 	    			} catch ( QuitGameRoomException q ) {
 	    				myGame = null;

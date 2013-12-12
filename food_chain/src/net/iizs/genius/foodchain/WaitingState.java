@@ -14,7 +14,7 @@ public class WaitingState extends AbstractGameRoomState {
 	}
 	
 	public void printUsageSimple(String nickname) throws Exception {
-		getPlayer(nickname).getChannel().writeAndFlush(ROOM_USAGE_SIMPLE + NEWLINE);
+		getPlayer(nickname).getChannel().writeAndFlush(WAIT_USAGE_SIMPLE + NEWLINE);
 	}
 	
 	public void join(String nickname, ChannelHandlerContext ctx) throws Exception {		
@@ -49,9 +49,10 @@ public class WaitingState extends AbstractGameRoomState {
 			if ( p.isBot() ) {
 				players_.remove(p.getNickname());
 				broadcast("봇 [" + p.getNickname() + "]이 제거되었습니다.");
-				break;
+				return;
 			}
 		}
+		throw new NoBotFoundException("더 이상 제거할 봇이 없습니다.");
 	}
 	
 	public void showInfo(String nickname) throws Exception {
@@ -88,10 +89,19 @@ public class WaitingState extends AbstractGameRoomState {
     		showInfo( nickname );
     	} else if ( cmd.equals("/start") ) {
     		if ( players_.size() < Character.values().length ) {
-    			throw new GeniusServerException("참가자가 부족합니다. 봇을 추가하거나, 다른 플레이어의 입장을 기다려주세요.");
+    			throw new GeniusServerException("플레이어가 부족합니다. 봇을 추가하거나, 다른 플레이어의 입장을 기다려주세요.");
     		}
+    		
+    		while ( players_.size() > Character.values().length ) {
+    			try {
+    				removeBot();
+    			} catch ( NoBotFoundException e ) {
+    				throw new NoBotFoundException("플레이어가 너무 많습니다.");
+    			}
+    		}
+    		
     		return new InitState(this);
-    	} else if ( cmd.equals("/add_bot") ) {    		
+    	} else if ( cmd.equals("/add_bot") || cmd.equals("/add") ) {    		
     		String botName;
     		try {
     			botName = cmds[1];
@@ -100,7 +110,7 @@ public class WaitingState extends AbstractGameRoomState {
     			botName = nickname + "_" + Long.toString(appendix); 
     		}    		
     		addBot( botName );
-    	} else if ( cmd.equals("/del_bot") ) {
+    	} else if ( cmd.equals("/del_bot") || cmd.equals("/del") ) {
     		removeBot();
     	} else {
     		printUsageSimple(nickname);

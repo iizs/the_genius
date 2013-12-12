@@ -8,7 +8,7 @@ import java.util.Set;
 import io.netty.channel.ChannelHandlerContext;
 
 public class WaitingState extends AbstractGameRoomState {
-
+	
 	public WaitingState() {
 		super();
 	}

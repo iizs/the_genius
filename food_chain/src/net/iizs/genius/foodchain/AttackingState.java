@@ -5,8 +5,10 @@ import io.netty.channel.Channel;
 
 import java.util.Iterator;
 import java.util.Set;
+import java.util.logging.Logger;
 
 public class AttackingState extends AbstractGameRoomState {
+	private static final Logger logger_ = Logger.getLogger(FoodChainServerHandler.class.getName());
 
 	public AttackingState(AbstractGameRoomState cl) {
 		super(cl);

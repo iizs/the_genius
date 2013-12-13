@@ -175,6 +175,9 @@ public class AttackingState extends AbstractGameRoomState {
 		p.kill();
 		++kills_;
 		broadcast("[" + p.getNickname() + "]님이 죽었습니다.");
+		minimap_.get(p.getCurrentArea()).remove(p);
+		minimap_.get(Area.HALL).add(p);
+		p.setCurrentArea(Area.HALL);
 		logger_.info("@" + name_ + ": " + "[" + p.getNickname() + "] is killed");
 	}
 	
@@ -183,12 +186,21 @@ public class AttackingState extends AbstractGameRoomState {
 		Character ac = a.getCharacter();
 		Character dc = d.getCharacter();
 		
+		if ( a.equals(d) ) {
+			throw new GeniusServerException("자기 자신은 공격할 수 없습니다.");
+		}
+		
 		if ( ac.equals(Character.SNAKE) ) {
 			throw new GeniusServerException("'" + ac.getName() + "'은 공격할 수 없습니다.");
 		}
 		
 		if ( ! a.getCurrentArea().equals(d.getCurrentArea()) ) {
 			throw new GeniusServerException("같은 지역의 플레이어만 공격할 수 있습니다.");
+		}
+		
+		// 사실 이 메시지는 나오면 안됨. 죽으면 지역을 빠져나가기 때문
+		if ( d.isAlive() == false ) {
+			throw new GeniusServerException("살아있는 플레이어만 공격할 수 있습니다.");
 		}
 		
 		// 여기까지 왔으면, 유효한 공격임
@@ -280,7 +292,7 @@ public class AttackingState extends AbstractGameRoomState {
 		Player p = getPlayer(nickname);
 		
 		p.getChannel().write( "> 방 번호: " + name_ + NEWLINE );
-		p.getChannel().write( "> 관리자암호: " + adminPassword_ + NEWLINE );
+		//p.getChannel().write( "> 관리자암호: " + adminPassword_ + NEWLINE );
 		p.getChannel().write( "> 플레이어" + NEWLINE );
 		
     	Set<String> playerNames = players_.keySet();

@@ -65,7 +65,7 @@ public class FoodChainServerHandler extends SimpleChannelInboundHandler<String> 
         cgLobby_.add(ctx.channel());
         
         myGame_ = null;
-        nickname_ = ctx.channel().remoteAddress().toString();
+        nickname_ = Util.generateNickname();
         lobbyBroadcast( "[" + nickname_ + "]님이 로비에 들어왔습니다" );
         
         logger_.info("[" + nickname_ + "] logged in");

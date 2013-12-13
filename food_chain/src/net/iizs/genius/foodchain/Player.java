@@ -17,7 +17,7 @@ public class Player {
 	private Set<String> peeps_;
 	private List<Area> movingHistory_;
 	private Area currentArea_;
-	private boolean agreedToProceed_;
+	private boolean passed_;
 	
 	public Player(String n, Channel c) {
 		nickname_ = n;
@@ -119,11 +119,11 @@ public class Player {
 		return nickname_;
 	}	
 	
-	public void setAgreeToProceed(boolean b) {
-		agreedToProceed_ = b;
+	public void setPassed(boolean b) {
+		passed_ = b;
 	}
 	
-	public boolean getAgreeToProceed() {
-		return agreedToProceed_;
+	public boolean getPassed() {
+		return passed_;
 	}
 }

@@ -20,7 +20,7 @@ public class AttackingState extends AbstractGameRoomState {
 				p.setCurrentArea(p.getMoves().get(round_ - 1));
 				minimap_.get(p.getCurrentArea()).add(p);
 				
-				p.setAgreeToProceed(false);
+				p.setPassed(false);
 			}
 		}
 		
@@ -36,7 +36,7 @@ public class AttackingState extends AbstractGameRoomState {
 		broadcast("공격 결과는 즉시 공개됩니다. 제한 시간은 " + ( ATTACK_TIME_LIMIT_SECOND / 60 ) + "분 입니다.");
 		broadcast("공격 결과 판정 순서는 *입력 순서대로* 입니다.");
 		broadcast("더 이상 공격을 하지 않으려 한다면 /next 명령을 입력해주세요.");
-		broadcast("모든 플레이어가 /next 명령을 입력한다면, " + ( ATTACK_TIME_LIMIT_SECOND / 60 ) + "분이 지나지 않아도 다음 라운드로 진행됩니다.");
+		broadcast("모든 플레이어가 /pass 명령을 입력한다면, " + ( ATTACK_TIME_LIMIT_SECOND / 60 ) + "분이 지나지 않아도 다음 라운드로 진행됩니다.");
 	}
 	
 	private AbstractGameRoomState proceed() throws Exception {
@@ -46,7 +46,7 @@ public class AttackingState extends AbstractGameRoomState {
 			if ( p.isBot() ) continue; 
 			
 			if ( p.isAlive() ) {
-				if ( p.getAgreeToProceed() != true ) {
+				if ( p.getPassed() != true ) {
 					flag = false;
 					break;
 				}
@@ -85,10 +85,10 @@ public class AttackingState extends AbstractGameRoomState {
     		}
 
     		// TODO impl
-    	} else if ( cmd.equals("/next") ) {
+    	} else if ( cmd.equals("/pass") ) {
     		Player p = getPlayer(nickname);
     		
-    		p.setAgreeToProceed(true);
+    		p.setPassed(true);
     		p.getChannel().writeAndFlush(">>> 다음 라운드로 진행해도 좋다고 설정하셨습니다." + NEWLINE );    		
     	} else if ( cmd.equals("/to") ) {
     		whisper(nickname, cmds[1], cmds[2]);

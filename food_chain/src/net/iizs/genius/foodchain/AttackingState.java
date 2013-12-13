@@ -28,6 +28,9 @@ public class AttackingState extends AbstractGameRoomState {
 			}
 		}
 		
+		jobQueue_.add(new ScheduleRequest("/admin " + adminPassword_ + " end " + Integer.toString(round_)
+						, ATTACK_TIME_LIMIT_SECOND * 1000));
+		
 		broadcast( round_ + " 라운드가 시작되었습니다.");
 		broadcast("플레이어들의 이동결과는 다음과 같습니다.");
 		broadcast("");
@@ -105,16 +108,12 @@ public class AttackingState extends AbstractGameRoomState {
     			throw new GeniusServerException("관리자 암호 오류");
     		}
     		
-    		logger_.info(cmds[2]);
-    		logger_.info("1:" + Boolean.toString(forceProceed_));
-    		
     		if ( cmds[2].toLowerCase().equals("end") ) {
 	    		if ( Integer.parseInt( cmds[3] ) != round_ ) {
 	    			throw new GeniusServerException("진행중인 라운드가 아닙니다.");
 	    		}
 	    		forceProceed_ = true;
     		}
-    		logger_.info("2:" + Boolean.toString(forceProceed_));
     		
     	} else if ( cmd.equals("/to") ) {
     		whisper(nickname, cmds[1], cmds[2]);

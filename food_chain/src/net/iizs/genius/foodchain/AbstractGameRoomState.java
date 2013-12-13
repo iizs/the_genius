@@ -10,6 +10,7 @@ import io.netty.util.concurrent.GlobalEventExecutor;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 
 public abstract class AbstractGameRoomState {
@@ -19,12 +20,14 @@ public abstract class AbstractGameRoomState {
 	protected String adminPassword_;
 	protected int round_;
 	protected Map<Area,List<Player>> minimap_;
+	protected ConcurrentLinkedQueue<ScheduleRequest> jobQueue_;
 	
 	public AbstractGameRoomState() {
 		name_ = "";
 		cgAllPlayers_ = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
-		players_ = new ConcurrentHashMap<>();
+		players_ = new ConcurrentHashMap<String, Player>();
 		adminPassword_ = Util.generatePassword();
+		jobQueue_ = new ConcurrentLinkedQueue<ScheduleRequest>();
 	}
 	
 	public AbstractGameRoomState(AbstractGameRoomState c) {
@@ -34,6 +37,7 @@ public abstract class AbstractGameRoomState {
 		round_ = c.round_;
 		minimap_ = c.minimap_;
 		adminPassword_ = c.adminPassword_;
+		jobQueue_ = c.jobQueue_;
 	}
 	
 	protected Player getPlayer(String nickname) throws Exception {
@@ -93,9 +97,12 @@ public abstract class AbstractGameRoomState {
 		p.becomeBot();
 		broadcast("[" + nickname + "]님을 대신해서 봇이 게임을 진행합니다.");
 	}
+
+	public ConcurrentLinkedQueue<ScheduleRequest> getJobQueue() {
+		return jobQueue_;
+	}
 	
 	public abstract AbstractGameRoomState userCommand(String nickname, String req) throws Exception;
 	public abstract void printUsageSimple(String nickname) throws Exception;
 	public abstract void showInfo(String nickname) throws Exception;
-
 }

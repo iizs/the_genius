@@ -2,6 +2,8 @@ package net.iizs.genius.foodchain;
 
 import java.util.Iterator;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
@@ -13,20 +15,44 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
-
 import static net.iizs.genius.foodchain.Constants.*;
 
 public class FoodChainServerHandler extends SimpleChannelInboundHandler<String> {
 
 	static final ChannelGroup cgAllUsers_ = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 	static final ChannelGroup cgLobby_ = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
-	static final ConcurrentMap<String, GameRoom> allGameRooms_ = new ConcurrentHashMap<>();
+	static final ConcurrentMap<String, GameRoom> allGameRooms_ = new ConcurrentHashMap<String, GameRoom>();
+	static final Timer jobScheduler = new Timer();
 	
 	GameRoom myGame_ = null;
 	String nickname_;
 	
     private static final Logger logger_ = Logger.getLogger(FoodChainServerHandler.class.getName());
 
+    private class ScheduledJob extends TimerTask {
+    	private GameRoom room_;
+    	private String cmd_;
+    	private String nick_;
+    	
+    	public ScheduledJob(GameRoom r, String n, String c) {
+    		room_ = r;
+    		nick_ = n;
+    		cmd_ = c;
+    	}
+
+		@Override
+		public void run() {
+			try {
+				logger_.info("[" + nick_ + "](admin)@" + room_.getName() + " " + cmd_);
+				room_.userCommand(nick_, cmd_);
+			} catch ( Exception e ) {
+				logger_.warning("[" + nick_ + "](admin)@" + room_.getName() + " " + cmd_);
+				
+			}
+			
+		}
+    }
+    
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         // Send greeting for a new connection.
@@ -179,6 +205,11 @@ public class FoodChainServerHandler extends SimpleChannelInboundHandler<String> 
 	    			try {
 	    				logger_.info("[" + nickname_ + "]@" + myGame_.getName() + " " + request);
 	    				myGame_.userCommand(nickname_, request);
+	    				while ( ! myGame_.getJobQueue().isEmpty() ) {
+	    					ScheduleRequest req = myGame_.getJobQueue().poll();
+	    					ScheduledJob job = new ScheduledJob(myGame_, nickname_, req.getCommand());
+	    					jobScheduler.schedule(job, req.getDelay());
+	    				}
 	    			} catch ( QuitGameRoomException q ) {
 	    				myGame_ = null;
 	    				cgLobby_.add(ctx.channel());

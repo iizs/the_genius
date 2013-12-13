@@ -1,5 +1,7 @@
 package net.iizs.genius.foodchain;
 
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 import io.netty.channel.ChannelHandlerContext;
 
 public class GameRoom {
@@ -42,6 +44,9 @@ public class GameRoom {
 		state_.printUsageSimple(nickname);
 	}
 	
+	public ConcurrentLinkedQueue<ScheduleRequest> getJobQueue() {
+		return state_.getJobQueue();
+	}
 
 
 }

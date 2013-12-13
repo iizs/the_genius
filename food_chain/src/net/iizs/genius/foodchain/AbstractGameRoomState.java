@@ -16,6 +16,7 @@ public abstract class AbstractGameRoomState {
 	protected ChannelGroup cgAllPlayers_;
 	protected ConcurrentMap<String, Player> players_;
 	protected String name_;
+	protected String adminPassword_;
 	protected int round_;
 	protected Map<Area,List<Player>> minimap_;
 	
@@ -23,6 +24,7 @@ public abstract class AbstractGameRoomState {
 		name_ = "";
 		cgAllPlayers_ = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 		players_ = new ConcurrentHashMap<>();
+		adminPassword_ = Util.generatePassword();
 	}
 	
 	public AbstractGameRoomState(AbstractGameRoomState c) {
@@ -31,6 +33,7 @@ public abstract class AbstractGameRoomState {
 		players_ = c.players_;
 		round_ = c.round_;
 		minimap_ = c.minimap_;
+		adminPassword_ = c.adminPassword_;
 	}
 	
 	protected Player getPlayer(String nickname) throws Exception {
@@ -47,6 +50,10 @@ public abstract class AbstractGameRoomState {
 
 	public String getName() {
 		return name_;
+	}
+	
+	public String getAdminPassword() {
+		return adminPassword_;
 	}
 	
 	public void broadcast(String msg) {

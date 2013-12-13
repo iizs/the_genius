@@ -10,9 +10,13 @@ import java.util.logging.Logger;
 public class AttackingState extends AbstractGameRoomState {
 	private static final Logger logger_ = Logger.getLogger(FoodChainServerHandler.class.getName());
 
+	private boolean forceProceed_;
+	
 	public AttackingState(AbstractGameRoomState cl) {
 		super(cl);
 
+		forceProceed_ = false;
+		
 		// 플레이어 이동. 진행 동의 초기화
 		for ( Player p: players_.values() ) {
 			if ( p.isAlive() ) {
@@ -53,7 +57,7 @@ public class AttackingState extends AbstractGameRoomState {
 			}
 		}
 		
-		if ( flag == true ) {
+		if ( flag == true || forceProceed_ == true ) {
 			// 다음 라운드로 진행
 			// TODO impl
 			broadcast( round_ + " 라운드가 종료되었습니다.");
@@ -90,6 +94,28 @@ public class AttackingState extends AbstractGameRoomState {
     		
     		p.setPassed(true);
     		p.getChannel().writeAndFlush(">>> 다음 라운드로 진행해도 좋다고 설정하셨습니다." + NEWLINE );    		
+    	} else if ( cmd.equals("/admin") ) {
+    		cmds = req.split("\\s+");
+        	
+    		if ( cmds.length < 4 ) {
+    			throw new GeniusServerException("/admin [관리자암호] end [라운드]");
+    		}
+
+    		if ( ! cmds[1].equals(adminPassword_) ) {
+    			throw new GeniusServerException("관리자 암호 오류");
+    		}
+    		
+    		logger_.info(cmds[2]);
+    		logger_.info("1:" + Boolean.toString(forceProceed_));
+    		
+    		if ( cmds[2].toLowerCase().equals("end") ) {
+	    		if ( Integer.parseInt( cmds[3] ) != round_ ) {
+	    			throw new GeniusServerException("진행중인 라운드가 아닙니다.");
+	    		}
+	    		forceProceed_ = true;
+    		}
+    		logger_.info("2:" + Boolean.toString(forceProceed_));
+    		
     	} else if ( cmd.equals("/to") ) {
     		whisper(nickname, cmds[1], cmds[2]);
     	} else if ( cmd.equals("/info") ) {
@@ -111,6 +137,7 @@ public class AttackingState extends AbstractGameRoomState {
 		Player p = getPlayer(nickname);
 		
 		p.getChannel().write( "> 방 번호: " + name_ + NEWLINE );
+		p.getChannel().write( "> 관리자암호: " + adminPassword_ + NEWLINE );
 		p.getChannel().write( "> 플레이어" + NEWLINE );
 		
     	Set<String> playerNames = players_.keySet();

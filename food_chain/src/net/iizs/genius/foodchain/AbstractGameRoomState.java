@@ -9,6 +9,7 @@ import io.netty.util.concurrent.GlobalEventExecutor;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
@@ -18,9 +19,13 @@ public abstract class AbstractGameRoomState {
 	protected ConcurrentMap<String, Player> players_;
 	protected String name_;
 	protected String adminPassword_;
-	protected int round_;
-	protected Map<Area,List<Player>> minimap_;
 	protected ConcurrentLinkedQueue<ScheduleRequest> jobQueue_;
+	
+	protected int round_;
+	protected int kills_;
+	protected Map<Area,List<Player>> minimap_;
+	protected Set<Player> herbivores_;
+	protected Map<Character,Player> charmap_;
 	
 	public AbstractGameRoomState() {
 		name_ = "";
@@ -38,6 +43,9 @@ public abstract class AbstractGameRoomState {
 		minimap_ = c.minimap_;
 		adminPassword_ = c.adminPassword_;
 		jobQueue_ = c.jobQueue_;
+		herbivores_ = c.herbivores_;
+		charmap_ = c.charmap_;
+		kills_ = c.kills_;
 	}
 	
 	protected Player getPlayer(String nickname) throws Exception {

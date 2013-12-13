@@ -18,29 +18,34 @@ public class Player {
 	private List<Area> movingHistory_;
 	private Area currentArea_;
 	private boolean passed_;
+	private Set<Integer> roundAte_;
 	
 	public Player(String n, Channel c) {
 		nickname_ = n;
 		channel_ = c;
 		
-		peeps_ = new HashSet<>();
-		movingHistory_ = new ArrayList<>();
+		peeps_ = new HashSet<String>();
+		movingHistory_ = new ArrayList<Area>();
+		roundAte_ = new HashSet<Integer>();
 	}
 	
 	public Player(String n) {
 		// bot player
 		nickname_ = n;
 		channel_ = null;
-		peeps_ = new HashSet<>();
-		movingHistory_ = new ArrayList<>();
+		
+		peeps_ = new HashSet<String>();
+		movingHistory_ = new ArrayList<Area>();
+		roundAte_ = new HashSet<Integer>();
 	}
 	
 	public void reset() {
 		alive_ = true;
 		character_ = null;
 		selection_ = null;
-		peeps_ = new HashSet<>();
-		movingHistory_ = new ArrayList<>();
+		peeps_ = new HashSet<String>();
+		movingHistory_ = new ArrayList<Area>();
+		roundAte_ = new HashSet<Integer>();
 	}
 	
 	public boolean isBot() {
@@ -125,5 +130,17 @@ public class Player {
 	
 	public boolean getPassed() {
 		return passed_;
+	}
+	
+	public void eat(Player p, int round) {
+		roundAte_.add( Integer.valueOf(round) );
+	}
+	
+	public Set<Integer> getRoundsAte() {
+		return roundAte_;
+	}
+	
+	public void kill() {
+		alive_ = false;
 	}
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -16,10 +17,13 @@ public class InitState extends AbstractGameRoomState {
 		super(cl);
 		
 		round_ = 0;
-		minimap_ = new HashMap<>();
+		kills_ = 0;
+		minimap_ = new HashMap<Area,List<Player>>();
 		for ( Area a : Area.values() ) {
 			minimap_.put(a, new ArrayList<Player>());
 		}
+		herbivores_ = new HashSet<Player>();
+		charmap_ = new HashMap<Character,Player>();
 		
 		List<Character> chars = Arrays.asList( Character.values() );
 		Collections.shuffle( chars );
@@ -33,6 +37,14 @@ public class InitState extends AbstractGameRoomState {
 			p.setCharacter( c );
 			p.setCurrentArea( Area.HALL );
 			minimap_.get( Area.HALL ).add(p);
+			charmap_.put(c, p);
+			
+			if ( c.equals(Character.MALLARD)
+					|| c.equals(Character.RABBIT)
+					|| c.equals(Character.DEER)
+					|| c.equals(Character.OTTER) ) {
+				herbivores_.add( p );
+			}
 			
 			if ( ! p.isBot() ) {
 				p.getChannel().writeAndFlush(">>> 당신은 '" + c.getName() + "' 입니다." + NEWLINE );

@@ -72,7 +72,7 @@ public class AttackingState extends AbstractGameRoomState {
 	}
 
 	@Override
-	public AbstractGameRoomState userCommand(String nickname, String req)
+	public synchronized AbstractGameRoomState userCommand(String nickname, String req)
 			throws Exception {
 		String cmds[] = req.split("\\s+", 3);
     	String cmd = cmds[0].toLowerCase();

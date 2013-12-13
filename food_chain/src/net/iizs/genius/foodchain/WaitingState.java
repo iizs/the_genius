@@ -17,10 +17,6 @@ public class WaitingState extends AbstractGameRoomState {
 		super(c);
 	}
 
-	public void userCommand(String nickname, String[] cmds) throws Exception {
-		printUsageSimple(nickname);
-	}
-	
 	public void printUsageSimple(String nickname) throws Exception {
 		getPlayer(nickname).getChannel().writeAndFlush(WAIT_USAGE_SIMPLE + NEWLINE);
 	}
@@ -84,7 +80,7 @@ public class WaitingState extends AbstractGameRoomState {
     	p.getChannel().flush();
 	}
 	
-	public AbstractGameRoomState userCommand(String nickname, String req) throws Exception {
+	public synchronized AbstractGameRoomState userCommand(String nickname, String req) throws Exception {
     	String cmds[] = req.split("\\s+", 3);
     	String cmd = cmds[0].toLowerCase();
     	

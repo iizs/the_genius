@@ -1,6 +1,6 @@
-package net.iizs.genius.server;
+package net.iizs.genius.server.foodchain;
 
-import static net.iizs.genius.server.Constants.NEWLINE;
+import static net.iizs.genius.server.foodchain.Constants.NEWLINE;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.group.ChannelGroup;
@@ -14,7 +14,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 
-public abstract class AbstractGameRoomState {
+import net.iizs.genius.server.GeniusServerException;
+import net.iizs.genius.server.ScheduleRequest;
+import net.iizs.genius.server.Util;
+
+public abstract class AbstractFoodChainState {
 	protected ChannelGroup cgAllPlayers_;
 	protected ConcurrentMap<String, Player> players_;
 	protected String name_;
@@ -27,7 +31,7 @@ public abstract class AbstractGameRoomState {
 	protected Set<Player> herbivores_;
 	protected Map<Character,Player> charmap_;
 	
-	public AbstractGameRoomState() {
+	public AbstractFoodChainState() {
 		name_ = "";
 		cgAllPlayers_ = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 		players_ = new ConcurrentHashMap<String, Player>();
@@ -35,7 +39,7 @@ public abstract class AbstractGameRoomState {
 		jobQueue_ = new ConcurrentLinkedQueue<ScheduleRequest>();
 	}
 	
-	public AbstractGameRoomState(AbstractGameRoomState c) {
+	public AbstractFoodChainState(AbstractFoodChainState c) {
 		name_ = c.name_;
 		cgAllPlayers_ = c.cgAllPlayers_;
 		players_ = c.players_;
@@ -110,7 +114,7 @@ public abstract class AbstractGameRoomState {
 		return jobQueue_;
 	}
 	
-	public abstract AbstractGameRoomState userCommand(String nickname, String req) throws Exception;
+	public abstract AbstractFoodChainState userCommand(String nickname, String req) throws Exception;
 	public abstract void printUsageSimple(String nickname) throws Exception;
 	public abstract void showInfo(String nickname) throws Exception;
 }

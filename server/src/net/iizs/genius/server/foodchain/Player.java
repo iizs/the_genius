@@ -1,10 +1,11 @@
-package net.iizs.genius.server;
+package net.iizs.genius.server.foodchain;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import net.iizs.genius.server.GeniusServerException;
 import io.netty.channel.Channel;
 
 public class Player {

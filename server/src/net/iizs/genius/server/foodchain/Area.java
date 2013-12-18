@@ -1,4 +1,6 @@
-package net.iizs.genius.server;
+package net.iizs.genius.server.foodchain;
+
+import net.iizs.genius.server.GeniusServerException;
 
 public enum Area {
 	PLAINS("들"),

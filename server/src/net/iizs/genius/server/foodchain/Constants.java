@@ -1,4 +1,4 @@
-package net.iizs.genius.server;
+package net.iizs.genius.server.foodchain;
 
 public interface Constants {
 	static final String NEWLINE = "\r\n";

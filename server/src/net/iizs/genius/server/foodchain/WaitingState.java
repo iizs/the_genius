@@ -1,19 +1,22 @@
-package net.iizs.genius.server;
+package net.iizs.genius.server.foodchain;
 
-import static net.iizs.genius.server.Constants.*;
+import static net.iizs.genius.server.foodchain.Constants.*;
 
 import java.util.Iterator;
 import java.util.Set;
 
+import net.iizs.genius.server.GeniusServerException;
+import net.iizs.genius.server.NoBotFoundException;
+import net.iizs.genius.server.QuitGameRoomException;
 import io.netty.channel.ChannelHandlerContext;
 
-public class WaitingState extends AbstractGameRoomState {
+public class WaitingState extends AbstractFoodChainState {
 	
 	public WaitingState() {
 		super();
 	}
 
-	public WaitingState(AbstractGameRoomState c) {
+	public WaitingState(AbstractFoodChainState c) {
 		super(c);
 	}
 
@@ -80,7 +83,7 @@ public class WaitingState extends AbstractGameRoomState {
     	p.getChannel().flush();
 	}
 	
-	public synchronized AbstractGameRoomState userCommand(String nickname, String req) throws Exception {
+	public synchronized AbstractFoodChainState userCommand(String nickname, String req) throws Exception {
     	String cmds[] = req.split("\\s+", 3);
     	String cmd = cmds[0].toLowerCase();
     	

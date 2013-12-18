@@ -1,12 +1,14 @@
-package net.iizs.genius.server;
+package net.iizs.genius.server.foodchain;
 
-import static net.iizs.genius.server.Constants.*;
+import static net.iizs.genius.server.foodchain.Constants.*;
 
 import java.util.Iterator;
 import java.util.Set;
 
-public class MovingState extends AbstractGameRoomState {
-	public MovingState(AbstractGameRoomState cl) {
+import net.iizs.genius.server.GeniusServerException;
+
+public class MovingState extends AbstractFoodChainState {
+	public MovingState(AbstractFoodChainState cl) {
 		super(cl);
 		
 		++round_;
@@ -17,7 +19,7 @@ public class MovingState extends AbstractGameRoomState {
 		broadcast("이동 결과는 모든 플레이어가 각자의 명령을 실행한 다음 동시에 공개 됩니다.");
 	}
 	
-	private AbstractGameRoomState proceed() throws Exception {
+	private AbstractFoodChainState proceed() throws Exception {
 		boolean flag = true;
 		
 		for ( Player p: players_.values() ) {
@@ -61,7 +63,7 @@ public class MovingState extends AbstractGameRoomState {
 	}
 
 	@Override
-	public synchronized AbstractGameRoomState userCommand(String nickname, String req)
+	public synchronized AbstractFoodChainState userCommand(String nickname, String req)
 			throws Exception {
 		String cmds[] = req.split("\\s+", 3);
     	String cmd = cmds[0].toLowerCase();

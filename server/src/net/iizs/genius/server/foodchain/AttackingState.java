@@ -1,6 +1,6 @@
-package net.iizs.genius.server;
+package net.iizs.genius.server.foodchain;
 
-import static net.iizs.genius.server.Constants.*;
+import static net.iizs.genius.server.foodchain.Constants.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -9,13 +9,17 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
-public class AttackingState extends AbstractGameRoomState {
+import net.iizs.genius.server.FoodChainServerHandler;
+import net.iizs.genius.server.GeniusServerException;
+import net.iizs.genius.server.ScheduleRequest;
+
+public class AttackingState extends AbstractFoodChainState {
 	private static final Logger logger_ = Logger.getLogger(FoodChainServerHandler.class.getName());
 
 	private boolean forceProceed_;
 	private boolean invincibleHerbivores_;
 	
-	public AttackingState(AbstractGameRoomState cl) {
+	public AttackingState(AbstractFoodChainState cl) {
 		super(cl);
 
 		forceProceed_ = false;
@@ -64,7 +68,7 @@ public class AttackingState extends AbstractGameRoomState {
 		logger_.info("@" + name_ + ": " + Area.RIVER + ": " + minimap_.get(Area.RIVER).toString());
 	}
 	
-	private AbstractGameRoomState proceed() throws Exception {
+	private AbstractFoodChainState proceed() throws Exception {
 		boolean flag = true;
 		
 		for ( Player p: players_.values() ) {
@@ -234,7 +238,7 @@ public class AttackingState extends AbstractGameRoomState {
 	}
 
 	@Override
-	public synchronized AbstractGameRoomState userCommand(String nickname, String req)
+	public synchronized AbstractFoodChainState userCommand(String nickname, String req)
 			throws Exception {
 		String cmds[] = req.split("\\s+", 3);
     	String cmd = cmds[0].toLowerCase();

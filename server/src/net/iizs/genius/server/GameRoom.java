@@ -2,10 +2,12 @@ package net.iizs.genius.server;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import net.iizs.genius.server.foodchain.AbstractFoodChainState;
+import net.iizs.genius.server.foodchain.WaitingState;
 import io.netty.channel.ChannelHandlerContext;
 
 public class GameRoom {
-	private AbstractGameRoomState state_;
+	private AbstractFoodChainState state_;
 
  	
 	public GameRoom() {

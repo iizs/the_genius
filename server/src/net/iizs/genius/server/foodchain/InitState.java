@@ -1,4 +1,4 @@
-package net.iizs.genius.server;
+package net.iizs.genius.server.foodchain;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,11 +9,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import static net.iizs.genius.server.Constants.*;
+import net.iizs.genius.server.GeniusServerException;
+import static net.iizs.genius.server.foodchain.Constants.*;
 
-public class InitState extends AbstractGameRoomState {
+public class InitState extends AbstractFoodChainState {
 
-	public InitState(AbstractGameRoomState cl) {
+	public InitState(AbstractFoodChainState cl) {
 		super(cl);
 		
 		round_ = 0;
@@ -64,7 +65,7 @@ public class InitState extends AbstractGameRoomState {
 		
 	}
 	
-	private AbstractGameRoomState proceed() throws Exception {
+	private AbstractFoodChainState proceed() throws Exception {
 		boolean flag = true;
 		
 		for ( Player p: players_.values() ) {
@@ -120,7 +121,7 @@ public class InitState extends AbstractGameRoomState {
 	}
 
 	@Override
-	public synchronized AbstractGameRoomState userCommand(String nickname, String req) throws Exception {
+	public synchronized AbstractFoodChainState userCommand(String nickname, String req) throws Exception {
 		String cmds[] = req.split("\\s+", 3);
     	String cmd = cmds[0].toLowerCase();
     	

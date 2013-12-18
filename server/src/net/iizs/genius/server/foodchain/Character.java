@@ -1,6 +1,7 @@
-package net.iizs.genius.server;
+package net.iizs.genius.server.foodchain;
 
-import static net.iizs.genius.server.Area.*;
+import static net.iizs.genius.server.foodchain.Area.*;
+import net.iizs.genius.server.GeniusServerException;
 
 public enum Character {
 	LION("사자", 5, PLAINS, false, 1) {

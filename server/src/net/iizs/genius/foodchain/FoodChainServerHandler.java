@@ -142,7 +142,9 @@ public class FoodChainServerHandler extends SimpleChannelInboundHandler<String> 
     	} else if ( cmd.equals("/list") ) {
     		listGameRooms(ctx);
     	} else if ( cmd.equals("/join") ) {
-    		joinGameRoom(ctx, cmds[1]);
+    		if ( cmds.length >= 2 ) {
+    			joinGameRoom(ctx, cmds[1]);
+    		}
     	} else if ( cmd.equals("/create") ) {
     		createGameRoom(ctx);
     	} else if ( cmd.equals("/bye") ) {

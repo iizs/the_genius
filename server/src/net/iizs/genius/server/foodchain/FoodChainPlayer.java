@@ -6,37 +6,34 @@ import java.util.List;
 import java.util.Set;
 
 import net.iizs.genius.server.GeniusServerException;
+import net.iizs.genius.server.Player;
 import io.netty.channel.Channel;
 
-public class Player {
-	private String nickname_;
-	private Channel channel_;
-	
+public class FoodChainPlayer extends Player {
+
 	private boolean alive_;
-	private Character character_;
-	private Character selection_; // 까마귀, 카멜레온의 선택
+	private FoodChainCharacter character_;
+	private FoodChainCharacter selection_; // 까마귀, 카멜레온의 선택
 	private Set<String> peeps_;
-	private List<Area> movingHistory_;
-	private Area currentArea_;
+	private List<FoodChainArea> movingHistory_;
+	private FoodChainArea currentArea_;
 	private boolean passed_;
 	private Set<Integer> roundAte_;
 	
-	public Player(String n, Channel c) {
-		nickname_ = n;
-		channel_ = c;
+	public FoodChainPlayer(String n, Channel c) {
+		super(n, c);
 		
 		peeps_ = new HashSet<String>();
-		movingHistory_ = new ArrayList<Area>();
+		movingHistory_ = new ArrayList<FoodChainArea>();
 		roundAte_ = new HashSet<Integer>();
 	}
 	
-	public Player(String n) {
+	public FoodChainPlayer(String n) {
 		// bot player
-		nickname_ = n;
-		channel_ = null;
+		super(n);
 		
 		peeps_ = new HashSet<String>();
-		movingHistory_ = new ArrayList<Area>();
+		movingHistory_ = new ArrayList<FoodChainArea>();
 		roundAte_ = new HashSet<Integer>();
 	}
 	
@@ -45,39 +42,25 @@ public class Player {
 		character_ = null;
 		selection_ = null;
 		peeps_ = new HashSet<String>();
-		movingHistory_ = new ArrayList<Area>();
+		movingHistory_ = new ArrayList<FoodChainArea>();
 		roundAte_ = new HashSet<Integer>();
 	}
 	
-	public boolean isBot() {
-		return ( channel_ == null );
-	}
+
 	
-	public void becomeBot() {
-		channel_ = null;
-	}
-	
-	public Channel getChannel() {
-		return channel_;
-	}
-	
-	public String getNickname() {
-		return nickname_;
-	}
-	
-	public void setCharacter(Character c) {
+	public void setCharacter(FoodChainCharacter c) {
 		character_ = c;
 	}
 	
-	public Character getCharacter() {
+	public FoodChainCharacter getCharacter() {
 		return character_;
 	}
 	
-	public void setSelection(Character c) {
+	public void setSelection(FoodChainCharacter c) {
 		selection_ = c;
 	}
 
-	public Character getSelection() {
+	public FoodChainCharacter getSelection() {
 		return selection_;
 	}
 	
@@ -85,7 +68,7 @@ public class Player {
 		if ( peeps_.size() == character_.getPeepingCount() ) {
 			throw new GeniusServerException("더 이상 엿보기를 실행할 수 없습니다; " + peeps_.toString() );
 		}
-		if ( nick.equals(nickname_) ) {
+		if ( nick.equals(getNickname()) ) {
 			throw new GeniusServerException("자기 자신을 엿볼 수는 없습니다; " + peeps_.toString() );
 		}
 		peeps_.add(nick);
@@ -96,7 +79,7 @@ public class Player {
 	}
 	
 	// round 는 1-base 이므로 index 사용시 주의 할 것
-	public void addMove(int round, Area a) {
+	public void addMove(int round, FoodChainArea a) {
 		if ( movingHistory_.size() < round ) {
 			movingHistory_.add(a);
 		} else {
@@ -104,7 +87,7 @@ public class Player {
 		}
 	}
 	
-	public List<Area> getMoves() {
+	public List<FoodChainArea> getMoves() {
 		return movingHistory_;
 	}
 	
@@ -112,17 +95,17 @@ public class Player {
 		return alive_;
 	}
 	
-	public void setCurrentArea(Area a) {
+	public void setCurrentArea(FoodChainArea a) {
 		currentArea_ = a;
 	}
 	
-	public Area getCurrentArea() {
+	public FoodChainArea getCurrentArea() {
 		return currentArea_;
 	}
 
 	@Override
 	public String toString() {
-		return nickname_;
+		return getNickname();
 	}	
 	
 	public void setPassed(boolean b) {
@@ -133,7 +116,7 @@ public class Player {
 		return passed_;
 	}
 	
-	public void eat(Player p, int round) {
+	public void eat(FoodChainPlayer p, int round) {
 		roundAte_.add( Integer.valueOf(round) );
 	}
 	

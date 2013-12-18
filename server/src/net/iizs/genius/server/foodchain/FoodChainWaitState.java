@@ -1,22 +1,24 @@
 package net.iizs.genius.server.foodchain;
 
-import static net.iizs.genius.server.foodchain.Constants.*;
+import static net.iizs.genius.server.foodchain.FoodChainConstants.*;
+import static net.iizs.genius.server.Constants.NEWLINE;
 
 import java.util.Iterator;
 import java.util.Set;
 
 import net.iizs.genius.server.GeniusServerException;
 import net.iizs.genius.server.NoBotFoundException;
+import net.iizs.genius.server.Player;
 import net.iizs.genius.server.QuitGameRoomException;
 import io.netty.channel.ChannelHandlerContext;
 
-public class WaitingState extends AbstractFoodChainState {
+public class FoodChainWaitState extends AbstractFoodChainState {
 	
-	public WaitingState() {
+	public FoodChainWaitState() {
 		super();
 	}
 
-	public WaitingState(AbstractFoodChainState c) {
+	public FoodChainWaitState(AbstractFoodChainState c) {
 		super(c);
 	}
 
@@ -25,36 +27,36 @@ public class WaitingState extends AbstractFoodChainState {
 	}
 	
 	public void join(String nickname, ChannelHandlerContext ctx) throws Exception {		
-		Player p = new Player( nickname, ctx.channel() );
-		if ( players_.putIfAbsent( nickname, p ) != null ) {
-			throw new GeniusServerException( name_ + "번 게임방에 들어갈 수 없습니다; 같은 이름의 플레이어가 존재합니다." );
+		FoodChainPlayer p = new FoodChainPlayer( nickname, ctx.channel() );
+		if ( getAllPlayers().putIfAbsent( nickname, p ) != null ) {
+			throw new GeniusServerException( getName() + "번 게임방에 들어갈 수 없습니다; 같은 이름의 플레이어가 존재합니다." );
 		}
-		cgAllPlayers_.add( ctx.channel() );
+		getAllPlayersChannelGroup().add( ctx.channel() );
 		broadcast( "[" + nickname + "]님이 들어왔습니다." );		
 	}
 	
 	public void quit(String nickname) throws Exception {
-		Player p = getPlayer(nickname);
+		FoodChainPlayer p = getFoodChainPlayer(nickname);
 		
-		cgAllPlayers_.remove( p.getChannel() );
+		getAllPlayersChannelGroup().remove( p.getChannel() );
 		broadcast("[" + nickname + "]님이 나갔습니다.");
 	
 		// 깨끗하게 퇴장
-		players_.remove( nickname );
+		getAllPlayers().remove( nickname );
 	}
 	
 	private void addBot(String botName) throws Exception {
-		Player p = new Player( botName );
-		if ( players_.putIfAbsent( botName, p ) != null ) {
+		FoodChainPlayer p = new FoodChainPlayer( botName );
+		if ( getAllPlayers().putIfAbsent( botName, p ) != null ) {
 			throw new GeniusServerException( "봇을 생성할 수 없습니다; 같은 이름의 플레이어가 존재합니다." );
 		}
 		broadcast("봇 [" + botName + "]이 생성되었습니다.");
 	}
 	
 	private void removeBot() throws Exception {
-		for ( Player p: players_.values() ) {
+		for ( Player p: getAllPlayers().values() ) {
 			if ( p.isBot() ) {
-				players_.remove(p.getNickname());
+				getAllPlayers().remove(p.getNickname());
 				broadcast("봇 [" + p.getNickname() + "]이 제거되었습니다.");
 				return;
 			}
@@ -63,15 +65,15 @@ public class WaitingState extends AbstractFoodChainState {
 	}
 	
 	public void showInfo(String nickname) throws Exception {
-		Player p = getPlayer(nickname);
+		FoodChainPlayer p = getFoodChainPlayer(nickname);
 		
-		p.getChannel().write( "> 방 번호: " + name_ + NEWLINE );
+		p.getChannel().write( "> 방 번호: " + getName() + NEWLINE );
 		p.getChannel().write( "> 플레이어" + NEWLINE );
 		
-    	Set<String> playerNames = players_.keySet();
+    	Set<String> playerNames = getAllPlayers().keySet();
     	Iterator<String> iter = playerNames.iterator();
     	while ( iter.hasNext() ) {    		
-    		Player i = getPlayer(iter.next());
+    		FoodChainPlayer i = getFoodChainPlayer(iter.next());
     		
     		p.getChannel().write("> [" + i.getNickname() + "]");
     		if ( i.isBot() ) {
@@ -95,11 +97,11 @@ public class WaitingState extends AbstractFoodChainState {
     	} else if ( cmd.equals("/info") ) {
     		showInfo( nickname );
     	} else if ( cmd.equals("/start") ) {
-    		if ( players_.size() < Character.values().length ) {
+    		if ( getAllPlayers().size() < FoodChainCharacter.values().length ) {
     			throw new GeniusServerException("플레이어가 부족합니다. 봇을 추가하거나, 다른 플레이어의 입장을 기다려주세요.");
     		}
     		
-    		while ( players_.size() > Character.values().length ) {
+    		while ( getAllPlayers().size() > FoodChainCharacter.values().length ) {
     			try {
     				removeBot();
     			} catch ( NoBotFoundException e ) {
@@ -107,7 +109,7 @@ public class WaitingState extends AbstractFoodChainState {
     			}
     		}
     		
-    		return new InitState(this);
+    		return new FoodChainInitState(this);
     	} else if ( cmd.equals("/add_bot") || cmd.equals("/add") ) {    		
     		String botName;
     		try {

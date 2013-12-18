@@ -10,40 +10,42 @@ import java.util.List;
 import java.util.Set;
 
 import net.iizs.genius.server.GeniusServerException;
-import static net.iizs.genius.server.foodchain.Constants.*;
+import net.iizs.genius.server.Player;
+import static net.iizs.genius.server.foodchain.FoodChainConstants.*;
+import static net.iizs.genius.server.Constants.NEWLINE;
 
-public class InitState extends AbstractFoodChainState {
+public class FoodChainInitState extends AbstractFoodChainState {
 
-	public InitState(AbstractFoodChainState cl) {
+	public FoodChainInitState(AbstractFoodChainState cl) {
 		super(cl);
 		
 		round_ = 0;
 		kills_ = 0;
-		minimap_ = new HashMap<Area,List<Player>>();
-		for ( Area a : Area.values() ) {
-			minimap_.put(a, new ArrayList<Player>());
+		minimap_ = new HashMap<FoodChainArea,List<FoodChainPlayer>>();
+		for ( FoodChainArea a : FoodChainArea.values() ) {
+			minimap_.put(a, new ArrayList<FoodChainPlayer>());
 		}
-		herbivores_ = new HashSet<Player>();
-		charmap_ = new HashMap<Character,Player>();
+		herbivores_ = new HashSet<FoodChainPlayer>();
+		charmap_ = new HashMap<FoodChainCharacter,FoodChainPlayer>();
 		
-		List<Character> chars = Arrays.asList( Character.values() );
+		List<FoodChainCharacter> chars = Arrays.asList( FoodChainCharacter.values() );
 		Collections.shuffle( chars );
-		List<Player> players = new ArrayList<Player>( players_.values() );
+		List<Player> players = new ArrayList<Player>( getAllPlayers().values() );
 		
 		for ( int i=0; i < chars.size(); ++i ) {
-			Player p = players.get(i);
-			Character c = chars.get(i);
+			FoodChainPlayer p = (FoodChainPlayer) players.get(i);
+			FoodChainCharacter c = chars.get(i);
 			
 			p.reset();
 			p.setCharacter( c );
-			p.setCurrentArea( Area.HALL );
-			minimap_.get( Area.HALL ).add(p);
+			p.setCurrentArea( FoodChainArea.HALL );
+			minimap_.get( FoodChainArea.HALL ).add(p);
 			charmap_.put(c, p);
 			
-			if ( c.equals(Character.MALLARD)
-					|| c.equals(Character.RABBIT)
-					|| c.equals(Character.DEER)
-					|| c.equals(Character.OTTER) ) {
+			if ( c.equals(FoodChainCharacter.MALLARD)
+					|| c.equals(FoodChainCharacter.RABBIT)
+					|| c.equals(FoodChainCharacter.DEER)
+					|| c.equals(FoodChainCharacter.OTTER) ) {
 				herbivores_.add( p );
 			}
 			
@@ -68,10 +70,11 @@ public class InitState extends AbstractFoodChainState {
 	private AbstractFoodChainState proceed() throws Exception {
 		boolean flag = true;
 		
-		for ( Player p: players_.values() ) {
+		for ( Player ap: getAllPlayers().values() ) {
+			FoodChainPlayer p = (FoodChainPlayer) ap;
 			if ( p.isBot() ) continue;
-			Character c = p.getCharacter();
-			if ( c.equals(Character.CROW) || c.equals(Character.CHAMELEON) ) {
+			FoodChainCharacter c = p.getCharacter();
+			if ( c.equals(FoodChainCharacter.CROW) || c.equals(FoodChainCharacter.CHAMELEON) ) {
 				if ( p.getSelection() == null ) {
 					flag = false;
 					break;
@@ -85,15 +88,16 @@ public class InitState extends AbstractFoodChainState {
 		
 		if ( flag == true ) {
 			// 봇들의 선택을 랜덤으로 추가
-			for ( Player p: players_.values() ) {
+			for ( Player ap: getAllPlayers().values() ) {
+				FoodChainPlayer p = (FoodChainPlayer) ap;
 				if ( p.isBot() ) {
-					Character c = p.getCharacter();
-					if ( c.equals(Character.CROW) ) {
-						p.setSelection(Character.LION);
+					FoodChainCharacter c = p.getCharacter();
+					if ( c.equals(FoodChainCharacter.CROW) ) {
+						p.setSelection(FoodChainCharacter.LION);
 					}
 					
-					if ( c.equals(Character.CHAMELEON) ) {
-						p.setSelection(Character.SNAKE);
+					if ( c.equals(FoodChainCharacter.CHAMELEON) ) {
+						p.setSelection(FoodChainCharacter.SNAKE);
 					}
 					
 					// 봇의 peep 은 추가하지 않아도 진행에 문제는 없다.
@@ -101,13 +105,14 @@ public class InitState extends AbstractFoodChainState {
 			}
 			
 			// 각 사용자에게 peep 결과를 반환
-			for ( Player p: players_.values() ) {
+			for ( Player ap: getAllPlayers().values() ) {
+				FoodChainPlayer p = (FoodChainPlayer) ap;
 				if ( ! p.isBot() ) {
 					for ( String n : p.getPeeps() ) {
-						Character c = getPlayer(n).getCharacter();
+						FoodChainCharacter c = getFoodChainPlayer(n).getCharacter();
 						
-						if ( c.equals(Character.CHAMELEON) ) {
-							c = getPlayer(n).getSelection();
+						if ( c.equals(FoodChainCharacter.CHAMELEON) ) {
+							c = getFoodChainPlayer(n).getSelection();
 						}
 						
 						p.getChannel().writeAndFlush(">>> [" + n + "]님은 '" + c.getName() + "' 입니다." + NEWLINE );
@@ -115,7 +120,7 @@ public class InitState extends AbstractFoodChainState {
 				}
 			}
 			
-			return new MovingState(this);
+			return new FoodChainMoveState(this);
 		}
 		return this;
 	}
@@ -126,7 +131,7 @@ public class InitState extends AbstractFoodChainState {
     	String cmd = cmds[0].toLowerCase();
     	
     	if ( cmd.equals("/peep") ) {
-    		Player p = getPlayer(nickname);
+    		FoodChainPlayer p = getFoodChainPlayer(nickname);
     		if ( cmds.length < 2 ) {
     			throw new GeniusServerException("플레이어 닉네임을 지정해야 합니다.");
     		}
@@ -142,18 +147,18 @@ public class InitState extends AbstractFoodChainState {
     		}
     		
     	} else if ( cmd.equals("/select") ) {
-    		Player p = getPlayer(nickname);
-    		Character c = p.getCharacter();
+    		FoodChainPlayer p = getFoodChainPlayer(nickname);
+    		FoodChainCharacter c = p.getCharacter();
     		
     		if ( cmds.length < 2 ) {
     			throw new GeniusServerException("동물이름을 지정해야 합니다.");
     		}
     		
-    		if ( c.equals(Character.CROW) ) {
-    			p.setSelection( Character.getCharacterOf( cmds[1] ) );
+    		if ( c.equals(FoodChainCharacter.CROW) ) {
+    			p.setSelection( FoodChainCharacter.getCharacterOf( cmds[1] ) );
     			p.getChannel().writeAndFlush(">>> '" + cmds[1] + "'을 우승자로 예상하셨습니다." + NEWLINE );
-    		} else if ( c.equals(Character.CHAMELEON) ) {
-    			p.setSelection( Character.getCharacterOf( cmds[1] ) );
+    		} else if ( c.equals(FoodChainCharacter.CHAMELEON) ) {
+    			p.setSelection( FoodChainCharacter.getCharacterOf( cmds[1] ) );
     			p.getChannel().writeAndFlush(">>> '" + cmds[1] + "'로 위장하셨습니다." + NEWLINE );
     		} else {
     			throw new GeniusServerException("'" + c.getName() + "'는 이 명령을 실행할 수 없습니다.");
@@ -176,15 +181,15 @@ public class InitState extends AbstractFoodChainState {
 
 	@Override
 	public void showInfo(String nickname) throws Exception {
-		Player p = getPlayer(nickname);
+		FoodChainPlayer p = getFoodChainPlayer(nickname);
 		
-		p.getChannel().write( "> 방 번호: " + name_ + NEWLINE );
+		p.getChannel().write( "> 방 번호: " + getName() + NEWLINE );
 		p.getChannel().write( "> 플레이어" + NEWLINE );
 		
-    	Set<String> playerNames = players_.keySet();
+    	Set<String> playerNames = getAllPlayers().keySet();
     	Iterator<String> iter = playerNames.iterator();
     	while ( iter.hasNext() ) {    		
-    		Player i = getPlayer(iter.next());
+    		FoodChainPlayer i = getFoodChainPlayer(iter.next());
     		
     		p.getChannel().write("> [" + i.getNickname() + "]");
     		if ( i.isBot() ) {

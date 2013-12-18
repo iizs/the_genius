@@ -2,16 +2,15 @@ package net.iizs.genius.server;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import net.iizs.genius.server.foodchain.AbstractFoodChainState;
-import net.iizs.genius.server.foodchain.WaitingState;
+import net.iizs.genius.server.foodchain.FoodChainWaitState;
 import io.netty.channel.ChannelHandlerContext;
 
 public class GameRoom {
-	private AbstractFoodChainState state_;
+	private AbstractGameRoomState state_;
 
  	
 	public GameRoom() {
-		state_ = new WaitingState();
+		state_ = new FoodChainWaitState();
 	}
 	
 	public void setName(String n) {

@@ -1,9 +1,9 @@
 package net.iizs.genius.server.foodchain;
 
-import static net.iizs.genius.server.foodchain.Area.*;
+import static net.iizs.genius.server.foodchain.FoodChainArea.*;
 import net.iizs.genius.server.GeniusServerException;
 
-public enum Character {
+public enum FoodChainCharacter {
 	LION("사자", 5, PLAINS, false, 1) {
 		@Override
 		public String losingCondition() {
@@ -124,11 +124,11 @@ public enum Character {
 	};
 	
 	private final int rank_;
-	private final Area habitat_;
+	private final FoodChainArea habitat_;
 	private final String name_;
 	private final boolean flyable_;
 	private final int peepCount_;
-	private Character(String n, int r, Area h, boolean f, int p) {
+	private FoodChainCharacter(String n, int r, FoodChainArea h, boolean f, int p) {
 		rank_ = r;
 		habitat_ = h;
 		name_ = n;
@@ -137,7 +137,7 @@ public enum Character {
 	}
 	
 	public int getRank() { return rank_; }
-	public Area getHabitat() { return habitat_; }
+	public FoodChainArea getHabitat() { return habitat_; }
 	public String getName() { return name_; }
 	public boolean isFlyable() { return flyable_; }
 	public int getPeepingCount() { return peepCount_; }
@@ -145,8 +145,8 @@ public enum Character {
 	public String losingCondition() { return "죽음"; }
 	public String note() { return "없음"; }
 	
-	public static Character getCharacterOf(String name) throws Exception {
-		for ( Character c: Character.values() ) {
+	public static FoodChainCharacter getCharacterOf(String name) throws Exception {
+		for ( FoodChainCharacter c: FoodChainCharacter.values() ) {
 			if ( name.equals(c.getName()) ) {
 				return c;
 			}

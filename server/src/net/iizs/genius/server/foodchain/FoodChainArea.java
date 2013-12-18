@@ -2,7 +2,7 @@ package net.iizs.genius.server.foodchain;
 
 import net.iizs.genius.server.GeniusServerException;
 
-public enum Area {
+public enum FoodChainArea {
 	PLAINS("들"),
 	WOODS("숲"),
 	SKY("하늘"),
@@ -10,14 +10,14 @@ public enum Area {
 	HALL("홀");
 	
 	private final String name_;
-	private Area(String n) {
+	private FoodChainArea(String n) {
 		name_ = n;
 	}
 	
 	public String getName() { return name_; }
 	
-	public static Area getAreaOf(String name) throws Exception {
-		for ( Area a: Area.values() ) {
+	public static FoodChainArea getAreaOf(String name) throws Exception {
+		for ( FoodChainArea a: FoodChainArea.values() ) {
 			if ( name.equals(a.getName()) ) {
 				return a;
 			}

@@ -1,4 +1,4 @@
-package net.iizs.genius.foodchain;
+package net.iizs.genius.server;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,7 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import static net.iizs.genius.foodchain.Constants.*;
+import static net.iizs.genius.server.Constants.*;
 
 public class InitState extends AbstractGameRoomState {
 

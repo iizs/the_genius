@@ -1,6 +1,7 @@
-package net.iizs.genius.foodchain;
+package net.iizs.genius.server;
 
-import static net.iizs.genius.foodchain.Constants.*;
+import static net.iizs.genius.server.Constants.*;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;

@@ -1,4 +1,4 @@
-package net.iizs.genius.foodchain;
+package net.iizs.genius.server;
 
 import java.util.Iterator;
 import java.util.Set;
@@ -15,7 +15,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
-import static net.iizs.genius.foodchain.Constants.*;
+import static net.iizs.genius.server.Constants.*;
 
 public class FoodChainServerHandler extends SimpleChannelInboundHandler<String> {
 

@@ -1,4 +1,4 @@
-package net.iizs.genius.foodchain;
+package net.iizs.genius.server;
 
 public enum Area {
 	PLAINS("들"),

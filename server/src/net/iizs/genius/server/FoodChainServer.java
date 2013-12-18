@@ -1,7 +1,7 @@
 /**
  * 
  */
-package net.iizs.genius.foodchain;
+package net.iizs.genius.server;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.EventLoopGroup;

@@ -1,4 +1,4 @@
-package net.iizs.genius.foodchain;
+package net.iizs.genius.server;
 
 public class Util {
 	private static String passchars_ = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*?-_=+";

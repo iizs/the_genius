@@ -1,6 +1,6 @@
-package net.iizs.genius.foodchain;
+package net.iizs.genius.server;
 
-import static net.iizs.genius.foodchain.Constants.NEWLINE;
+import static net.iizs.genius.server.Constants.NEWLINE;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.group.ChannelGroup;

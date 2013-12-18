@@ -1,4 +1,4 @@
-package net.iizs.genius.foodchain;
+package net.iizs.genius.server;
 
 import java.util.ArrayList;
 import java.util.HashSet;

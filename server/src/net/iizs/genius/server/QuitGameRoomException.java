@@ -1,4 +1,4 @@
-package net.iizs.genius.foodchain;
+package net.iizs.genius.server;
 
 public class QuitGameRoomException extends GeniusServerException {
 

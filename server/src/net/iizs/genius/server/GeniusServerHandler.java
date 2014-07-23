@@ -1,6 +1,8 @@
 package net.iizs.genius.server;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -26,6 +28,7 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
 	
 	GameRoom myGame_ = null;
 	String nickname_;
+	ResourceBundle messages_;
 	
     private static final Logger logger_ = Logger.getLogger(GeniusServerHandler.class.getName());
 
@@ -53,11 +56,20 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
 		}
     }
     
+    private String getMessage(String key) throws UnsupportedEncodingException {
+    	return new String( messages_.getString( key ).getBytes("ISO-8859-1"), "UTF-8" );
+    }
+    
+    private String getMessage(String key, Object ... args ) throws UnsupportedEncodingException {
+    	String s = new String( messages_.getString( key ).getBytes("ISO-8859-1"), "UTF-8" );
+    	return String.format(s, args);
+    }
+    
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
+    	messages_ = ResourceBundle.getBundle("i18n.ServerMessages");
         // Send greeting for a new connection.
-        ctx.write(
-                "먹이사슬 게임에 오신 것을 환영합니다." + NEWLINE);
+        ctx.write( getMessage("greetings") + NEWLINE );
         //ctx.write("It is " + new Date() + " now.\r\n");
         ctx.flush();
         
@@ -66,7 +78,7 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
         
         myGame_ = null;
         nickname_ = Util.generateNickname();
-        lobbyBroadcast( "[" + nickname_ + "]님이 로비에 들어왔습니다" );
+        lobbyBroadcast( getMessage("enterLobby", nickname_ ) );
         
         logger_.info("[" + nickname_ + "] logged in");
     }

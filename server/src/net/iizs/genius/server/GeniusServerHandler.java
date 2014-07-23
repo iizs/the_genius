@@ -17,7 +17,7 @@ import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import static net.iizs.genius.server.Constants.*;
 
-public class FoodChainServerHandler extends SimpleChannelInboundHandler<String> {
+public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
 
 	static final ChannelGroup cgAllUsers_ = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 	static final ChannelGroup cgLobby_ = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
@@ -27,7 +27,7 @@ public class FoodChainServerHandler extends SimpleChannelInboundHandler<String> 
 	GameRoom myGame_ = null;
 	String nickname_;
 	
-    private static final Logger logger_ = Logger.getLogger(FoodChainServerHandler.class.getName());
+    private static final Logger logger_ = Logger.getLogger(GeniusServerHandler.class.getName());
 
     private class ScheduledJob extends TimerTask {
     	private GameRoom room_;

@@ -8,7 +8,7 @@ import io.netty.handler.codec.Delimiters;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 
-public class FoodChainServerInitializer extends
+public class GeniusServerInitializer extends
 		ChannelInitializer<SocketChannel> {
     private static final StringDecoder DECODER = new StringDecoder();
     private static final StringEncoder ENCODER = new StringEncoder();
@@ -25,7 +25,7 @@ public class FoodChainServerInitializer extends
         pipeline.addLast("encoder", ENCODER);
 
         // and then business logic.
-        pipeline.addLast("handler", new FoodChainServerHandler());
+        pipeline.addLast("handler", new GeniusServerHandler());
     }
 
 }

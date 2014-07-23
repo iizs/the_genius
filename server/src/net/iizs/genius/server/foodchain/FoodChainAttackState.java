@@ -10,13 +10,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import net.iizs.genius.server.FoodChainServerHandler;
+import net.iizs.genius.server.GeniusServerHandler;
 import net.iizs.genius.server.GeniusServerException;
 import net.iizs.genius.server.Player;
 import net.iizs.genius.server.ScheduleRequest;
 
 public class FoodChainAttackState extends AbstractFoodChainState {
-	private static final Logger logger_ = Logger.getLogger(FoodChainServerHandler.class.getName());
+	private static final Logger logger_ = Logger.getLogger(GeniusServerHandler.class.getName());
 
 	private boolean forceProceed_;
 	private boolean invincibleHerbivores_;

@@ -84,7 +84,7 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
         // TDOO 새로운 스펙에 맞도록 수정 필요
         
         ServerMessageFormatter mf = ServerMessageFormatter.getInstance("TextFormatter");
-        mf.formatChatMessage("---");
+        mf.formatWorldMessage("---");
     }
     
     @Override

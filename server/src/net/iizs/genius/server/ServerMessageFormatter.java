@@ -12,10 +12,10 @@ public abstract class ServerMessageFormatter {
 	public abstract String formatGameRoomMessage(String msg);
 	
 	// 채팅 메시지
-	public abstract String formatChatMessage(String msg);
+	public abstract String formatChatMessage(String id, String msg);
 	
 	// 귓말 
-	public abstract String formatWhisperMessage(String msg);
+	public abstract String formatWhisperMessage(String id, String msg);
 	
 	// 사용자의 명령에 대한 응답
 	public abstract String formatResponseMessage(String msg);

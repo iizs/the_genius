@@ -20,6 +20,9 @@ public abstract class ServerMessageFormatter {
 	// 사용자의 명령에 대한 응답
 	public abstract String formatResponseMessage(String msg);
 	
+	// 에러 메시지
+	public abstract String formatErrorMessage(String msg);
+
 	public static ServerMessageFormatter getInstance(String name) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		String s = ServerMessageFormatter.class.getPackage().getName() + "."  + name;
 		Class<?> c = Class.forName(s);

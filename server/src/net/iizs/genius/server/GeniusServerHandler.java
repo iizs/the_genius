@@ -81,6 +81,10 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
         lobbyBroadcast( getMessage("enterLobby", nickname_ ) );
         
         logger_.info("[" + nickname_ + "] logged in");
+        // TDOO 새로운 스펙에 맞도록 수정 필요
+        
+        ServerMessageFormatter mf = ServerMessageFormatter.getInstance("TextFormatter");
+        mf.formatChatMessage("---");
     }
     
     @Override
@@ -92,6 +96,7 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
 			myGame_.quit(nickname_);
 		}
 		logger_.info("[" + nickname_ + "] disconnected");
+		// TODO 새로운 스펙에 맞도록 수정 필요
 	}
 
 	private void setNickname(ChannelHandlerContext ctx, String request) throws Exception {

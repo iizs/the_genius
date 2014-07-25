@@ -1,0 +1,30 @@
+package net.iizs.genius.server;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+
+public abstract class ServerMessageFormatter {
+	
+	// 서버에 접속해있는 모든 사람들에게 발송된는 메시지
+	public abstract String formatWorldMessage(String msg);
+	
+	// 게임방 안의 모든 사람들에게 발송되는 메시지
+	public abstract String formatGameRoomMessage(String msg);
+	
+	// 채팅 메시지
+	public abstract String formatChatMessage(String msg);
+	
+	// 귓말 
+	public abstract String formatWhisperMessage(String msg);
+	
+	// 사용자의 명령에 대한 응답
+	public abstract String formatResponseMessage(String msg);
+	
+	public static ServerMessageFormatter getInstance(String name) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		String s = ServerMessageFormatter.class.getPackage().getName() + "."  + name;
+		Class<?> c = Class.forName(s);
+		Constructor<?> ctor = c.getConstructor();
+		Object o = ctor.newInstance();
+		return (ServerMessageFormatter) o;
+	}
+}

@@ -90,16 +90,16 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
     				player_ = new Player( cmds[1] );
     				cachedPlayers_.put( cmds[1], player_ );
     			}
-    			ctx.write( formatter_.formatResponseMessage( getMessage("enterLobby", player_.getNickname() ) ) );
+    			ctx.write( formatter_.formatResponseMessage( new SimpleResponse( getMessage("enterLobby", player_.getNickname() ) ) ) );
     			ctx.flush();
     		} else {
     			// TODO 사실은 salt 를 반환해야 하는 시점이다. 현재는 usage로 땜빵해둔다.
-    			ctx.write( formatter_.formatResponseMessage( getMessage("usageLogin") ) );
+    			ctx.write( formatter_.formatResponseMessage( new SimpleResponse( getMessage("usageLogin") ) ) );
     			ctx.flush();
     		}
     	} else {
-    		ctx.write( formatter_.formatResponseMessage( getMessage("eLoginRequired") ) );
-			ctx.write( formatter_.formatResponseMessage( getMessage("usageLogin") ) );
+    		ctx.write( formatter_.formatResponseMessage( new SimpleResponse( getMessage("eLoginRequired") ) ) );
+			ctx.write( formatter_.formatResponseMessage( new SimpleResponse( getMessage("usageLogin") ) ) );
 			ctx.flush();
     	}
     }
@@ -245,8 +245,8 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
     				ctx.channel().writeAndFlush( formatter_.formatErrorMessage( e.getMessage() ) );
     			}
     		} else {
-    			ctx.write( formatter_.formatResponseMessage( getMessage("eLoginRequired") ) );
-    			ctx.write( formatter_.formatResponseMessage( getMessage("usageLogin") ) );
+    			ctx.write( formatter_.formatResponseMessage( new SimpleResponse( getMessage("eLoginRequired") ) ) );
+    			ctx.write( formatter_.formatResponseMessage( new SimpleResponse( getMessage("usageLogin") ) ) );
     	        ctx.flush();
     		}
     	} else if( currentGame_ == null ) { // player_ != null 

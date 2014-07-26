@@ -18,7 +18,7 @@ public abstract class ServerMessageFormatter {
 	public abstract String formatWhisperMessage(String id, String msg);
 	
 	// 사용자의 명령에 대한 응답
-	public abstract String formatResponseMessage(String msg);
+	public abstract String formatResponseMessage(AbstractResponse resp);
 	
 	// 에러 메시지
 	public abstract String formatErrorMessage(String msg);

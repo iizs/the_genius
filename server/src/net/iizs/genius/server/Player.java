@@ -3,17 +3,26 @@ package net.iizs.genius.server;
 import io.netty.channel.Channel;
 
 public class Player {
+	private String id_;
 	private String nickname_;
 	private Channel channel_;
 	
-	public Player(String n, Channel c) {
+	// 인자 없이 생성되는 것을 막기 위한 private 생성자.
+	private Player() {
+	
+	}
+
+	
+	public Player(String id, String n, Channel c) {
+		id_ = id;
 		nickname_ = n;
 		channel_ = c;
 	}
 	
-	public Player(String n) {
+	public Player(String id) {
 		// bot player
-		nickname_ = n;
+		id_ = id;
+		nickname_ = id;
 		channel_ = null;
 	}
 	
@@ -32,5 +41,7 @@ public class Player {
 	public String getNickname() {
 		return nickname_;
 	}
+	
+	
 
 }

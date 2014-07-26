@@ -21,7 +21,7 @@ public class FoodChainPlayer extends Player {
 	private Set<Integer> roundAte_;
 	
 	public FoodChainPlayer(String n, Channel c) {
-		super(n, c);
+		super(n, n, c);
 		
 		peeps_ = new HashSet<String>();
 		movingHistory_ = new ArrayList<FoodChainArea>();

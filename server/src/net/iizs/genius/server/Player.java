@@ -37,11 +37,27 @@ public class Player {
 	public Channel getChannel() {
 		return channel_;
 	}
+
+	public void setChannel(Channel c) {
+		channel_ = c;
+	}
 	
 	public String getNickname() {
 		return nickname_;
 	}
 	
-	
+	public void setNickname(String n) {
+		nickname_ = n;
+	}
+
+
+	public String getId() {
+		return id_;
+	}
+
+
+	public void setId(String id) {
+		this.id_ = id;
+	}
 
 }

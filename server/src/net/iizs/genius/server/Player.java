@@ -60,4 +60,12 @@ public class Player {
 		this.id_ = id;
 	}
 
+
+	@Override
+	public String toString() {
+		return "Player [" + nickname_ + "(" + id_ + ")"
+				+ "@" + channel_ + "]";
+	}
+
+	
 }

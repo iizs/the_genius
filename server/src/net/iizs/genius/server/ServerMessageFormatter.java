@@ -11,6 +11,9 @@ public abstract class ServerMessageFormatter {
 	// 게임방 안의 모든 사람들에게 발송되는 메시지
 	public abstract String formatGameRoomMessage(String msg);
 	
+	// 로비의 모든 사람들에게 발송되는 메시지
+	public abstract String formatLobbyMessage(String msg);
+	
 	// 채팅 메시지
 	public abstract String formatChatMessage(String id, String msg);
 	

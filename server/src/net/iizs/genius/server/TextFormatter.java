@@ -20,6 +20,11 @@ public class TextFormatter extends ServerMessageFormatter {
 	public String formatGameRoomMessage(String msg) {
 		return new String( "<< " + msg + " >>" + NEWLINE );
 	}
+	
+	@Override
+	public String formatLobbyMessage(String msg) {
+		return new String( "{{ " + msg + " }}" + NEWLINE );
+	}
 
 	@Override
 	public String formatChatMessage(String id, String msg) {

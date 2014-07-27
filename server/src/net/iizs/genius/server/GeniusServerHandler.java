@@ -78,6 +78,11 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
     	return cmds;
     }
     
+    
+    private void loginUsageSimple(ChannelHandlerContext ctx) throws Exception {
+    	ctx.writeAndFlush( formatter_.formatResponseMessage( new SimpleResponse( getMessage("usageLogin") ) ) );
+    }
+    
     private void loginCommand(ChannelHandlerContext ctx, String request) throws Exception {
     	String cmds[] = parseCommand(request);
 		String cmd = cmds[0];
@@ -90,8 +95,16 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
     				player_ = new Player( cmds[1] );
     				cachedPlayers_.put( cmds[1], player_ );
     			}
-    			ctx.write( formatter_.formatResponseMessage( new SimpleResponse( getMessage("enterLobby", player_.getNickname() ) ) ) );
-    			ctx.flush();
+    			player_.setChannel(ctx.channel());
+    			
+    			// TODO 진행중인 게임이 있었다면, 자동으로 참가하게 하는 것은 어떨까?
+    	        
+    	        cgAllUsers_.add(ctx.channel());
+    	        cgLobby_.add(ctx.channel());
+    			
+    	        lobbyBroadcast( getMessage("enterLobby", player_.getId(), player_.getNickname() ) );
+    	        
+    	        logger_.info(player_.toString() + " logged in");
     		} else {
     			// TODO 사실은 salt 를 반환해야 하는 시점이다. 현재는 usage로 땜빵해둔다.
     			ctx.write( formatter_.formatResponseMessage( new SimpleResponse( getMessage("usageLogin") ) ) );
@@ -104,53 +117,23 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
     	}
     }
 
-    
-    @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-    	messages_ = ResourceBundle.getBundle("i18n.ServerMessages");
-    	formatter_ = ServerMessageFormatter.getInstance("TextFormatter");
-        
-    	// Send greeting for a new connection.
-        ctx.write( getMessage("greetings") + NEWLINE );
-        ctx.flush();
-        
-        // login 정보가 없으므로 player_, currentGame_ 를 초기화한다.
-        player_ = null;
-        currentGame_ = null;
-        
-        // TDOO 새로운 스펙에 맞도록 수정 필요
-        
-        //cgAllUsers_.add(ctx.channel());
-        //cgLobby_.add(ctx.channel());
-        
-        //myGame_ = null;
-        //nickname_ = Util.generateNickname();
-        //lobbyBroadcast( getMessage("enterLobby", nickname_ ) );
-        
-        //logger_.info("[" + nickname_ + "] logged in");
-        
+    private void lobbyBroadcast(String msg) {
+        for (Channel c: cgLobby_) {
+        	c.writeAndFlush( formatter_.formatLobbyMessage(msg) );
+        }
     }
     
-    @Override
-	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-		super.channelInactive(ctx);
-		if ( currentGame_ == null ) {
-			lobbyBroadcast("[" + nickname_ + "]님이 로비에서 나갔습니다.");
-		} else {
-			currentGame_.quit(nickname_);
-		}
-		logger_.info("[" + nickname_ + "] disconnected");
-		// TODO 새로운 스펙에 맞도록 수정 필요
-	}
 
 
 	private void setNickname(ChannelHandlerContext ctx, String request) throws Exception {
+		// TODO
     	String old = nickname_;
     	nickname_ = request;
     	lobbyBroadcast("[" + old + "]님이 닉네임을 [" + nickname_ + "]으로 변경했습니다.");
     }
     
     private void listGameRooms(ChannelHandlerContext ctx) throws Exception {
+    	// TODO
     	Set<String> roomnames = allGameRooms_.keySet();
     	Iterator<String> iter = roomnames.iterator();
     	while ( iter.hasNext() ) {
@@ -163,6 +146,7 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
     }
     
     private void joinGameRoom(ChannelHandlerContext ctx, String key) throws Exception {
+    	// TODO
     	GameRoom room = allGameRooms_.get(key);
     	
     	if ( room == null ) {
@@ -176,6 +160,7 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
     }
     
     private void createGameRoom(ChannelHandlerContext ctx) throws Exception {
+    	// TODO
     	int i = 1;
     	GameRoom room = new GameRoom();
     	
@@ -187,13 +172,9 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
     	joinGameRoom( ctx, Integer.toString(i) );
     }
        
-    private void lobbyBroadcast(String msg) {
-        for (Channel c: cgLobby_) {
-        	c.writeAndFlush( "===== " + msg + " =====" + NEWLINE);
-        }
-    }
-    
+
     private void lobbyCommand(ChannelHandlerContext ctx, String request) throws Exception {
+    	// TODO
     	String cmds[] = request.split("\\s+");
     	String cmd = cmds[0].toLowerCase();
     	
@@ -217,6 +198,7 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
     }
     
     private void lobbyUsageSimple(ChannelHandlerContext ctx) {
+    	// TODO
     	ctx.channel().writeAndFlush(LOBBY_USAGE_SIMPLE + NEWLINE);
     }
 
@@ -228,26 +210,54 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
         }
 
         return result;
-      }
+     }
+  
     
     @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+    	messages_ = ResourceBundle.getBundle("i18n.ServerMessages");
+    	formatter_ = ServerMessageFormatter.getInstance("TextFormatter");
+        
+    	// Send greeting for a new connection.
+        ctx.writeAndFlush( formatter_.formatResponseMessage( new SimpleResponse( getMessage("greetings") ) ) );
+        
+        // login 정보가 없으므로 player_, currentGame_ 를 초기화한다.
+        player_ = null;
+        currentGame_ = null; 
+    }
+    
+    @Override
+	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+		super.channelInactive(ctx);
+		if ( currentGame_ == null ) {
+			lobbyBroadcast("[" + nickname_ + "]님이 로비에서 나갔습니다.");
+		} else {
+			currentGame_.quit(nickname_);
+		}
+		logger_.info("[" + nickname_ + "] disconnected");
+		// TODO 새로운 스펙에 맞도록 수정 필요
+	}
+
+    @Override
     public void channelRead0(ChannelHandlerContext ctx, String request) throws Exception {
-    	if ( request.length() == 0 ) {
-    		return;
-    	}
-    	
+
     	if ( player_ == null ) {
     		// login 단계
-    		if ( request.charAt(0) == '/' ) {
-    			try {
-    				loginCommand(ctx, request);
-    			} catch ( GeniusServerException e ) {
-    				ctx.channel().writeAndFlush( formatter_.formatErrorMessage( e.getMessage() ) );
-    			}
+    		if ( request.isEmpty() ) {
+    			// 로비 도움말
+    			loginUsageSimple(ctx);
     		} else {
-    			ctx.write( formatter_.formatResponseMessage( new SimpleResponse( getMessage("eLoginRequired") ) ) );
-    			ctx.write( formatter_.formatResponseMessage( new SimpleResponse( getMessage("usageLogin") ) ) );
-    	        ctx.flush();
+	    		if ( request.charAt(0) == '/' ) {
+	    			try {
+	    				loginCommand(ctx, request);
+	    			} catch ( GeniusServerException e ) {
+	    				ctx.channel().writeAndFlush( formatter_.formatErrorMessage( e.getMessage() ) );
+	    			}
+	    		} else {
+	    			ctx.write( formatter_.formatResponseMessage( new SimpleResponse( getMessage("eLoginRequired") ) ) );
+	    			ctx.write( formatter_.formatResponseMessage( new SimpleResponse( getMessage("usageLogin") ) ) );
+	    	        ctx.flush();
+	    		}
     		}
     	} else if( currentGame_ == null ) { // player_ != null 
     		if ( request.isEmpty() ) {

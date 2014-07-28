@@ -7,12 +7,6 @@ public class Player {
 	private String nickname_;
 	private Channel channel_;
 	
-	// 인자 없이 생성되는 것을 막기 위한 private 생성자.
-	private Player() {
-	
-	}
-
-	
 	public Player(String id, String n, Channel c) {
 		id_ = id;
 		nickname_ = n;

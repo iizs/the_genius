@@ -2,13 +2,17 @@ package net.iizs.genius.server;
 
 import static net.iizs.genius.server.Constants.*;
 
+import java.lang.reflect.Type;
+import java.util.HashMap;
+
 import com.google.gson.Gson;
 
 public class TextFormatter extends ServerMessageFormatter {
-	private Gson gson_;
+	
+	private HashMap<Type, Object> customFormatters_;
 	
 	public TextFormatter() {
-		gson_ = new Gson();
+		customFormatters_ = new HashMap<>();
 	}
 
 	@Override
@@ -43,7 +47,17 @@ public class TextFormatter extends ServerMessageFormatter {
 
 	@Override
 	public String formatResponseMessage(AbstractResponse resp) {
-		return new String( "| " + gson_.toJson(resp) + NEWLINE );
+		if ( customFormatters_.get( resp.getClass() ) != null ) {
+			CustomTextFormatter<Object> f = (CustomTextFormatter<Object>) customFormatters_.get( resp.getClass() );
+			return f.formatMessage(resp, resp.getClass());
+		}
+		return new String( "| " + resp.getMessage() + NEWLINE );
+	}
+
+	@Override
+	public ServerMessageFormatter registerCustomFormatter(Type type, Object customFormatter) {
+		customFormatters_.put(type, customFormatter);
+		return this;
 	}
 
 }

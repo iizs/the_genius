@@ -2,6 +2,7 @@ package net.iizs.genius.server;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Type;
 
 public abstract class ServerMessageFormatter {
 	
@@ -25,6 +26,10 @@ public abstract class ServerMessageFormatter {
 	
 	// 에러 메시지
 	public abstract String formatErrorMessage(String msg);
+	
+	// custom formatter를 추가하기 위한 method
+	// ServerMessageFormatter 를 반환하는 건 Builder pattern을 만족시키기 위해서이다.
+	public abstract ServerMessageFormatter registerCustomFormatter(Type type, Object customFormatter);
 
 	public static ServerMessageFormatter getInstance(String name) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		String s = ServerMessageFormatter.class.getPackage().getName() + "."  + name;

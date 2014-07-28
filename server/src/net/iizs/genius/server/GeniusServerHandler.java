@@ -136,12 +136,15 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
     	// TODO
     	Set<String> roomnames = allGameRooms_.keySet();
     	Iterator<String> iter = roomnames.iterator();
+    	ListResponse<String> resp = new ListResponse<>("");
+    	
     	while ( iter.hasNext() ) {
     		String name = iter.next();
     		
-    		ctx.channel().write("[" + name + "]" + NEWLINE);
+    		//ctx.channel().write("[" + name + "]" + NEWLINE);
+    		resp.add(name);
     	}
-    	
+    	ctx.channel().write( formatter_.formatResponseMessage(resp) );
     	ctx.channel().flush();
     }
     
@@ -169,7 +172,7 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
     	}
     	room.setName( Integer.toString(i) );
     	
-    	joinGameRoom( ctx, Integer.toString(i) );
+    	//joinGameRoom( ctx, Integer.toString(i) );
     }
        
 
@@ -223,7 +226,8 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
     	messages_ = ResourceBundle.getBundle("i18n.ServerMessages");
-    	formatter_ = ServerMessageFormatter.getInstance("TextFormatter");
+    	formatter_ = ServerMessageFormatter.getInstance("TextFormatter")
+    				.registerCustomFormatter(ListResponse.class, new ListResponseFormatter());
         
     	// Send greeting for a new connection.
         ctx.writeAndFlush( formatter_.formatResponseMessage( new SimpleResponse( getMessage("greetings") ) ) );

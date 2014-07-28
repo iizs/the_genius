@@ -63,8 +63,7 @@ public class Player {
 
 	@Override
 	public String toString() {
-		return "Player [" + nickname_ + "(" + id_ + ")"
-				+ "@" + channel_ + "]";
+		return "Player [" + nickname_ + "(" + id_ + ")]";
 	}
 
 	

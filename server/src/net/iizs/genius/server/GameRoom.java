@@ -5,11 +5,13 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import net.iizs.genius.server.foodchain.FoodChainWaitState;
 import io.netty.channel.ChannelHandlerContext;
 
-public class GameRoom {
+public class GameRoom implements Comparable<GameRoom> {
+	private GeniusServerHandler server_;
 	private AbstractGameRoomState state_;
 
  	
-	public GameRoom() {
+	public GameRoom(GeniusServerHandler server) {
+		server_ = server;
 		state_ = new FoodChainWaitState();
 	}
 	
@@ -19,6 +21,10 @@ public class GameRoom {
 	
 	public String getName() {
 		return state_.getName();
+	}
+	
+	public String getGamePackageName() {
+		return state_.getClass().getPackage().getName();
 	}
 	
 	public void join(String nickname, ChannelHandlerContext ctx) throws Exception {
@@ -47,6 +53,16 @@ public class GameRoom {
 	
 	public ConcurrentLinkedQueue<ScheduleRequest> getJobQueue() {
 		return state_.getJobQueue();
+	}
+
+	@Override
+	public String toString() {
+		return "[" + getName() + "] " + server_.getMessage( getGamePackageName() );
+	}
+
+	@Override
+	public int compareTo(GameRoom o) {
+		return getName().compareTo(o.getName());
 	}
 
 

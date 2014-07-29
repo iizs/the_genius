@@ -1,7 +1,11 @@
 package net.iizs.genius.server;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.Timer;
@@ -61,13 +65,29 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
 		}
     }
     
-    private String getMessage(String key) throws UnsupportedEncodingException {
-    	return new String( messages_.getString( key ).getBytes("ISO-8859-1"), "UTF-8" );
+    public String getMessage(String key) {
+    	try {
+			return new String( messages_.getString( key ).getBytes("ISO-8859-1"), "UTF-8" );
+		} catch (UnsupportedEncodingException e) {
+			logger_.warning( e.getMessage() );
+			return messages_.getString( key );
+		} catch (MissingResourceException e) {
+			logger_.warning( e.getMessage() );
+			return key;
+		}
     }
     
-    private String getMessage(String key, Object ... args ) throws UnsupportedEncodingException {
-    	String s = new String( messages_.getString( key ).getBytes("ISO-8859-1"), "UTF-8" );
-    	return String.format(s, args);
+    public String getMessage(String key, Object ... args ) {
+    	try {
+	    	String s = new String( messages_.getString( key ).getBytes("ISO-8859-1"), "UTF-8" );
+	    	return String.format(s, args);
+    	} catch (UnsupportedEncodingException e) {
+			logger_.warning( e.getMessage() );
+			return messages_.getString( key );
+    	} catch (MissingResourceException e) {
+			logger_.warning( e.getMessage() );
+			return key;
+		}
     }
     
     private String[] parseCommand(String s) {
@@ -133,16 +153,16 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
     }
     
     private void listGameRooms(ChannelHandlerContext ctx) throws Exception {
-    	// TODO
-    	Set<String> roomnames = allGameRooms_.keySet();
-    	Iterator<String> iter = roomnames.iterator();
-    	ListResponse<String> resp = new ListResponse<>("");
+    	List<GameRoom> roomlist = Collections.list(Collections.enumeration(allGameRooms_.values()));
+    	Collections.sort(roomlist);
+    	
+    	Iterator<GameRoom> iter = roomlist.iterator();
+    	ListResponse<GameRoom> resp = new ListResponse<>("");
     	
     	while ( iter.hasNext() ) {
-    		String name = iter.next();
+    		GameRoom room = iter.next();
     		
-    		//ctx.channel().write("[" + name + "]" + NEWLINE);
-    		resp.add(name);
+    		resp.add(room);
     	}
     	ctx.channel().write( formatter_.formatResponseMessage(resp) );
     	ctx.channel().flush();
@@ -165,7 +185,7 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
     private void createGameRoom(ChannelHandlerContext ctx) throws Exception {
     	// TODO
     	int i = 1;
-    	GameRoom room = new GameRoom();
+    	GameRoom room = new GameRoom(this);
     	
     	while ( allGameRooms_.putIfAbsent( Integer.toString(i), room ) != null ) {
     		++i;

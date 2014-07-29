@@ -5,11 +5,9 @@ import static net.iizs.genius.server.Constants.*;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 
-import com.google.gson.Gson;
-
 public class TextFormatter extends ServerMessageFormatter {
 	
-	private HashMap<Type, Object> customFormatters_;
+	private HashMap<Type, CustomTextFormatter<?>> customFormatters_;
 	
 	public TextFormatter() {
 		customFormatters_ = new HashMap<>();
@@ -48,7 +46,7 @@ public class TextFormatter extends ServerMessageFormatter {
 	@Override
 	public String formatResponseMessage(AbstractResponse resp) {
 		if ( customFormatters_.get( resp.getClass() ) != null ) {
-			CustomTextFormatter<Object> f = (CustomTextFormatter<Object>) customFormatters_.get( resp.getClass() );
+			CustomTextFormatter<AbstractResponse> f = (CustomTextFormatter<AbstractResponse>) customFormatters_.get( resp.getClass() );
 			return f.formatMessage(resp, resp.getClass());
 		}
 		return new String( "| " + resp.getMessage() + NEWLINE );
@@ -56,7 +54,9 @@ public class TextFormatter extends ServerMessageFormatter {
 
 	@Override
 	public ServerMessageFormatter registerCustomFormatter(Type type, Object customFormatter) {
-		customFormatters_.put(type, customFormatter);
+		if ( customFormatter instanceof CustomTextFormatter ) {
+			customFormatters_.put(type, (CustomTextFormatter<?>) customFormatter);
+		}
 		return this;
 	}
 

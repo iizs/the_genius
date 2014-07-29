@@ -1,6 +1,5 @@
 package net.iizs.genius.server;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Iterator;
 

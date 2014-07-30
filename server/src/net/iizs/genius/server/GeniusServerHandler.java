@@ -131,7 +131,7 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
     			ctx.flush();
     		}
     	} else {
-    		ctx.write( formatter_.formatResponseMessage( new SimpleResponse( getMessage("eLoginRequired") ) ) );
+    		ctx.write( formatter_.formatErrorMessage( getMessage("eLoginRequired") ) );
 			ctx.write( formatter_.formatResponseMessage( new SimpleResponse( getMessage("usageLogin") ) ) );
 			ctx.flush();
     	}
@@ -160,21 +160,61 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
     	int start_num = 1;
     	int display_cnt = 20;
     	
-    	if ( cmds.length > 2 ) {
-    		//game_id = 
+    	if ( cmds.length >= 2 ) {
+    		game_id = cmds[1];
+    	}
+    	
+    	if ( cmds.length >= 3 ) {
+    		try {
+    			start_num = Integer.parseInt( cmds[2] );
+    		} catch ( NumberFormatException e ) {
+    			ctx.writeAndFlush( 
+    					formatter_.formatResponseMessage( 
+    							new SimpleResponse( 
+    									getMessage("wIntegerRequiredUseDefault", 
+    												cmds[2], start_num ) ) ) );
+    		}
+    	}
+    	
+    	if ( cmds.length >= 4 ) {
+    		try {
+    			display_cnt = Integer.parseInt( cmds[3] );
+    		} catch ( NumberFormatException e ) {
+    			ctx.writeAndFlush( 
+    					formatter_.formatResponseMessage( 
+    							new SimpleResponse( 
+    									getMessage("wIntegerRequiredUseDefault", 
+    												cmds[3], display_cnt ) ) ) );
+    		}
     	}
     	
     	Iterator<GameRoom> iter = roomlist.iterator();
     	ListResponse<GameRoom> resp = new ListResponse<>("");
     	
     	while ( iter.hasNext() ) {
-    		//if ( )
     		GameRoom room = iter.next();
     		
-    		resp.add(room);
+    		if ( game_id.equals("all") 
+    				|| game_id.equals( room.getGameId() ) ) {
+    			logger_.info(game_id + " " + room.getGameId() + " "  + start_num + " " + display_cnt  +  " " + resp.size());
+    			if ( start_num > 1 ) {
+    				--start_num;
+    			} else {
+    				resp.add(room);
+    				if ( resp.size() >= display_cnt ) {
+        				break;
+        			}
+    			}
+    		}
     	}
-    	ctx.channel().write( formatter_.formatResponseMessage(resp) );
-    	ctx.channel().flush();
+    	
+    	if ( resp.size() > 0 ) {
+	    	ctx.channel().write( formatter_.formatResponseMessage(resp) );
+	    	ctx.channel().flush();
+    	} else {
+    		ctx.writeAndFlush( 
+					formatter_.formatErrorMessage( getMessage("eNoGameRoomsFound" ) ) );
+    	}
     }
     
     private void joinGameRoom(ChannelHandlerContext ctx, String key) throws Exception {

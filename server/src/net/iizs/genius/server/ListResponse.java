@@ -14,4 +14,6 @@ public class ListResponse<T> extends AbstractResponse {
 	public boolean add(T e) { return listitems_.add(e); }
 	
 	public Iterator<T> iterator() { return listitems_.iterator(); }
+	
+	public int size() { return listitems_.size(); }
 }

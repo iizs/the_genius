@@ -218,21 +218,19 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
     }
     
     private void joinGameRoom(ChannelHandlerContext ctx, String key) throws Exception {
-    	// TODO
     	GameRoom room = allGameRooms_.get(key);
     	
     	if ( room == null ) {
-    		throw new GeniusServerException(key + "번 게임방은 존재하지 않습니다.");
+    		throw new GeniusServerException( getMessage("eGameRoomNotFound", key) );
     	}
     	
-    	room.join(nickname_, ctx);
+    	room.join(player_.getId(), ctx);
     	currentGame_ = room;
     	cgLobby_.remove( ctx.channel() );
-    	lobbyBroadcast("[" + nickname_ + "]님이 " + key + "번 게임방에 들어갔습니다.");
+    	lobbyBroadcast( getMessage("exitLobby", player_.getId(), player_.getNickname() ) );
     }
     
     private void createGameRoom(ChannelHandlerContext ctx, String[] cmds) throws Exception {
-    	// TODO
     	int i = 1;
     	
     	if ( cmds.length < 2 ) {
@@ -249,7 +247,7 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
     	}
     	room.setName( Integer.toString(i) );
     	
-    	//joinGameRoom( ctx, Integer.toString(i) );
+    	joinGameRoom( ctx, room.getName() );
     }
        
 

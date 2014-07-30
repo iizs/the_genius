@@ -3,7 +3,8 @@ package net.iizs.genius.server;
 public class GeniusServerException extends Exception {
 
 	public GeniusServerException(String string) {
-		super( "!!!!! "  + string + " !!!!!" );
+		//super( "!!!!! "  + string + " !!!!!" );
+		super( string );
 	}
 
 	/**

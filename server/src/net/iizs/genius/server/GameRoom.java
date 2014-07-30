@@ -70,7 +70,7 @@ public class GameRoom implements Comparable<GameRoom> {
 			return new GameRoom(server, new FoodChainWaitState());
 		}
 		
-		throw new NotSupportedGameException( gameid );
+		throw new NotSupportedGameException( server.getMessage( "eInvalidGameId", gameid ) );
 	}
 
 }

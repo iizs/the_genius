@@ -231,10 +231,18 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
     	lobbyBroadcast("[" + nickname_ + "]님이 " + key + "번 게임방에 들어갔습니다.");
     }
     
-    private void createGameRoom(ChannelHandlerContext ctx) throws Exception {
+    private void createGameRoom(ChannelHandlerContext ctx, String[] cmds) throws Exception {
     	// TODO
     	int i = 1;
-    	GameRoom room = GameRoom.getInstance(this, "foodchain");
+    	
+    	if ( cmds.length < 2 ) {
+    		ctx.write( formatter_.formatResponseMessage( new SimpleResponse( getMessage("usageCreate" ) ) ) );
+    		ctx.write( formatter_.formatResponseMessage( new SimpleResponse( getMessage("usageGamdIds" ) ) ) );
+    		ctx.flush();
+    		throw new InvalidArgumentsException( getMessage( "eMissingArgs", "<game_id>") );
+    	}
+    	
+    	GameRoom room = GameRoom.getInstance(this, cmds[1] );
     	
     	while ( allGameRooms_.putIfAbsent( Integer.toString(i), room ) != null ) {
     		++i;
@@ -253,7 +261,6 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
     private boolean lobbyCommand(ChannelHandlerContext ctx, String cmds[]) throws Exception {
     	// TODO
 		String cmd = cmds[0];
-
     	boolean processed = false;
     	
     	
@@ -265,8 +272,8 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
     			joinGameRoom(ctx, cmds[1]);
     			processed = true;
     		}
-    	} else if ( cmd.equals("/create") ) {
-    		createGameRoom(ctx);
+    	} else if ( cmd.equals("/create") || cmd.equals("/c") ) {
+    		createGameRoom(ctx, cmds);
     		processed = true;
     	} else if ( cmd.equals("/logout") ) {
     		ctx.close();
@@ -356,7 +363,7 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
 	    					lobbyUsageSimple(ctx);
 	    				}
 	    			} catch ( GeniusServerException e ) {
-	    				ctx.channel().writeAndFlush( formatter_.formatResponseMessage( new SimpleResponse( e.getMessage() ) ) );
+	    				ctx.channel().writeAndFlush( formatter_.formatErrorMessage( e.getMessage() ) );
 	    			}
 	    		} else {
 	    			// 로비 채팅

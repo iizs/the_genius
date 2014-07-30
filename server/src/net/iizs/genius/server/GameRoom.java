@@ -9,10 +9,9 @@ public class GameRoom implements Comparable<GameRoom> {
 	private GeniusServerHandler server_;
 	private AbstractGameRoomState state_;
 
- 	
-	public GameRoom(GeniusServerHandler server) {
+	private GameRoom(GeniusServerHandler server, AbstractGameRoomState state) {
 		server_ = server;
-		state_ = new FoodChainWaitState();
+		state_ = state;
 	}
 	
 	public void setName(String n) {
@@ -23,8 +22,9 @@ public class GameRoom implements Comparable<GameRoom> {
 		return state_.getName();
 	}
 	
-	public String getGamePackageName() {
-		return state_.getClass().getPackage().getName();
+	public String getGameId() {
+		return state_.getClass().getPackage().getName().substring( 
+				this.getClass().getPackage().getName().length() + 1 );
 	}
 	
 	public void join(String nickname, ChannelHandlerContext ctx) throws Exception {
@@ -57,7 +57,7 @@ public class GameRoom implements Comparable<GameRoom> {
 
 	@Override
 	public String toString() {
-		return "[" + getName() + "] " + server_.getMessage( getGamePackageName() );
+		return "[" + getName() + "] " + server_.getMessage( getGameId() );
 	}
 
 	@Override
@@ -65,5 +65,12 @@ public class GameRoom implements Comparable<GameRoom> {
 		return getName().compareTo(o.getName());
 	}
 
+	public static GameRoom getInstance(GeniusServerHandler server, String gameid) throws GeniusServerException {
+		if ( gameid.equals( "foodchain" ) ) {
+			return new GameRoom(server, new FoodChainWaitState());
+		}
+		
+		throw new NotSupportedGameException( gameid );
+	}
 
 }

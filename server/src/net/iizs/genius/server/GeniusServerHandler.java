@@ -152,14 +152,23 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
     	lobbyBroadcast("[" + old + "]님이 닉네임을 [" + nickname_ + "]으로 변경했습니다.");
     }
     
-    private void listGameRooms(ChannelHandlerContext ctx) throws Exception {
+    private void listGameRooms(ChannelHandlerContext ctx, String[] cmds) throws Exception {
     	List<GameRoom> roomlist = Collections.list(Collections.enumeration(allGameRooms_.values()));
     	Collections.sort(roomlist);
+    	
+    	String game_id = "all";
+    	int start_num = 1;
+    	int display_cnt = 20;
+    	
+    	if ( cmds.length > 2 ) {
+    		//game_id = 
+    	}
     	
     	Iterator<GameRoom> iter = roomlist.iterator();
     	ListResponse<GameRoom> resp = new ListResponse<>("");
     	
     	while ( iter.hasNext() ) {
+    		//if ( )
     		GameRoom room = iter.next();
     		
     		resp.add(room);
@@ -185,7 +194,7 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
     private void createGameRoom(ChannelHandlerContext ctx) throws Exception {
     	// TODO
     	int i = 1;
-    	GameRoom room = new GameRoom(this);
+    	GameRoom room = GameRoom.getInstance(this, "foodchain");
     	
     	while ( allGameRooms_.putIfAbsent( Integer.toString(i), room ) != null ) {
     		++i;
@@ -208,8 +217,8 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
     	boolean processed = false;
     	
     	
-    	if ( cmd.equals("/list") ) {
-    		listGameRooms(ctx);
+    	if ( cmd.equals("/list") || cmd.equals("/l") ) {
+    		listGameRooms(ctx, cmds);
     		processed = true;
     	} else if ( cmd.equals("/join") ) {
     		if ( cmds.length >= 2 ) {

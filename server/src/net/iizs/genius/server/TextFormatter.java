@@ -12,35 +12,49 @@ public class TextFormatter extends ServerMessageFormatter {
 	public TextFormatter() {
 		customFormatters_ = new HashMap<>();
 	}
+	
+	private String formatMessage(String prefix, String msg, String postfix) {
+		if ( msg.indexOf('\n')  < 0 ) {
+			return prefix + msg + postfix + NEWLINE;
+		
+		}
+		
+		String[] msgs = msg.split("\n");
+		String ret = "";
+		for ( String s: msgs ) {
+			ret += prefix + s + postfix + NEWLINE;
+		}
+		return ret;
+	}
 
 	@Override
 	public String formatWorldMessage(String msg) {
-		return new String( "== " + msg + " ==" + NEWLINE);
+		return formatMessage("== ", msg, " ==");
 	}
 
 	@Override
 	public String formatGameRoomMessage(String msg) {
-		return new String( "<< " + msg + " >>" + NEWLINE );
+		return formatMessage("<< ", msg, " >>");
 	}
 	
 	@Override
 	public String formatLobbyMessage(String msg) {
-		return new String( "{{ " + msg + " }}" + NEWLINE );
+		return formatMessage("{{ ", msg, " }}");
 	}
 
 	@Override
 	public String formatChatMessage(String id, String msg) {
-		return new String( id + " : " + msg + NEWLINE );
+		return formatMessage( id + " : ", msg, "");
 	}
 
 	@Override
 	public String formatWhisperMessage(String id, String msg) {
-		return new String( "** " + id + " : " + msg + " **" + NEWLINE );
+		return formatMessage("** " + id + " : ", msg, " **");
 	}
 
 	@Override
 	public String formatErrorMessage(String msg) {
-		return new String( "!! " + msg + " !!" + NEWLINE );
+		return formatMessage("!! ", msg, " !!");
 	}
 
 	@Override

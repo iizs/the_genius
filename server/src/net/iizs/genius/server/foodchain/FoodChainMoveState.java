@@ -69,13 +69,13 @@ public class FoodChainMoveState extends AbstractFoodChainState {
 	}
 
 	@Override
-	public synchronized AbstractFoodChainState userCommand(String nickname, String req)
+	public synchronized AbstractFoodChainState userCommand(Player player, String[] cmds)
 			throws Exception {
-		String cmds[] = req.split("\\s+", 3);
+		//String cmds[] = req.split("\\s+", 3);
     	String cmd = cmds[0].toLowerCase();
     	
     	if ( cmd.equals("/move") ) {
-    		FoodChainPlayer p = getFoodChainPlayer(nickname);
+    		FoodChainPlayer p = getFoodChainPlayer(player.getId());
     		
     		if ( cmds.length < 2 ) {
     			throw new GeniusServerException("이동지역을 지정해야 합니다.");
@@ -93,24 +93,23 @@ public class FoodChainMoveState extends AbstractFoodChainState {
     		p.getChannel().writeAndFlush(">>> '" + cmds[1] + "'으로 이동하기로 설정하셨습니다." + NEWLINE );
     		
     	} else if ( cmd.equals("/to") ) {
-    		whisper(nickname, cmds[1], cmds[2]);
+    		whisper(player, cmds[1], cmds[2]);
     	} else if ( cmd.equals("/info") ) {
-    		showInfo( nickname );
+    		showInfo( player );
     	} else {
-    		printUsageSimple(nickname);
+    		printUsage(player);
     	}
     	
     	return proceed();
 	}
 
 	@Override
-	public void printUsageSimple(String nickname) throws Exception {
-		getPlayer(nickname).getChannel().writeAndFlush(MOVE_USAGE_SIMPLE + NEWLINE);
+	public void printUsage(Player player) throws Exception {
+		player.getChannel().writeAndFlush(MOVE_USAGE_SIMPLE + NEWLINE);
 	}
 
-	@Override
-	public void showInfo(String nickname) throws Exception {
-		FoodChainPlayer p = getFoodChainPlayer(nickname);
+	public void showInfo(Player player) throws Exception {
+		FoodChainPlayer p = getFoodChainPlayer(player.getId());
 		
 		p.getChannel().write( "> 방 번호: " + getName() + NEWLINE );
 		p.getChannel().write( "> 플레이어" + NEWLINE );
@@ -139,18 +138,18 @@ public class FoodChainMoveState extends AbstractFoodChainState {
 	}
 	
 	@Override
-	public void chat(String nickname, String msg) throws Exception {
-		FoodChainPlayer p = getFoodChainPlayer(nickname);
+	public void chat(Player player, String msg) throws Exception {
+		FoodChainPlayer p = getFoodChainPlayer(player.getId());
         for (FoodChainPlayer to: minimap_.get(p.getCurrentArea())) {
         	if ( to.isBot() ) continue;
-        	to.getChannel().writeAndFlush("[" + nickname + "] " + msg + NEWLINE);
+        	to.getChannel().writeAndFlush("[" + player.getId() + "] " + msg + NEWLINE);
         }
 	}
 	
 	@Override
-	public void whisper(String nickname, String to, String msg) throws Exception {
+	public void whisper(Player player, String to, String msg) throws Exception {
 		FoodChainPlayer p = getFoodChainPlayer(to);
-		FoodChainPlayer me = getFoodChainPlayer(nickname);
+		FoodChainPlayer me = getFoodChainPlayer(player.getId());
 		
 		if ( p.isBot() ) {
 			throw new GeniusServerException("[" + to + "]님은 봇입니다.");
@@ -160,7 +159,7 @@ public class FoodChainMoveState extends AbstractFoodChainState {
 			throw new GeniusServerException("다른 지역에 있는 플레이어에게는 귓속말을 보낼 수 없습니다.");
 		}
 		
-		p.getChannel().writeAndFlush(">>> [" + nickname + "]님의 귓속말: " + msg + NEWLINE);
+		p.getChannel().writeAndFlush(">>> [" + player.getId() + "]님의 귓속말: " + msg + NEWLINE);
 		me.getChannel().writeAndFlush( ">>> [" + to + "]님께 귓속말을 보냈습니다." + NEWLINE);
 	}
 

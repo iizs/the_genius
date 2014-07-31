@@ -6,7 +6,9 @@ import static net.iizs.genius.server.Constants.NEWLINE;
 import java.util.Iterator;
 import java.util.Set;
 
+import net.iizs.genius.server.AbstractGameRoomState;
 import net.iizs.genius.server.GeniusServerException;
+import net.iizs.genius.server.GeniusServerHandler;
 import net.iizs.genius.server.NoBotFoundException;
 import net.iizs.genius.server.Player;
 import net.iizs.genius.server.QuitGameRoomException;
@@ -14,16 +16,16 @@ import io.netty.channel.ChannelHandlerContext;
 
 public class FoodChainWaitState extends AbstractFoodChainState {
 	
-	public FoodChainWaitState() {
-		super();
+	public FoodChainWaitState(GeniusServerHandler server) {
+		super(server);
 	}
 
 	public FoodChainWaitState(AbstractFoodChainState c) {
 		super(c);
 	}
 
-	public void printUsageSimple(String nickname) throws Exception {
-		getPlayer(nickname).getChannel().writeAndFlush(WAIT_USAGE_SIMPLE + NEWLINE);
+	public void printUsage(Player p) throws Exception {
+		p.getChannel().writeAndFlush(WAIT_USAGE_SIMPLE + NEWLINE);
 	}
 	
 	public void join(String nickname, ChannelHandlerContext ctx) throws Exception {		
@@ -64,8 +66,8 @@ public class FoodChainWaitState extends AbstractFoodChainState {
 		throw new NoBotFoundException("더 이상 제거할 봇이 없습니다.");
 	}
 	
-	public void showInfo(String nickname) throws Exception {
-		FoodChainPlayer p = getFoodChainPlayer(nickname);
+	public void showInfo(Player player) throws Exception {
+		FoodChainPlayer p = getFoodChainPlayer(player.getId());
 		
 		p.getChannel().write( "> 방 번호: " + getName() + NEWLINE );
 		p.getChannel().write( "> 플레이어" + NEWLINE );
@@ -85,17 +87,17 @@ public class FoodChainWaitState extends AbstractFoodChainState {
     	p.getChannel().flush();
 	}
 	
-	public synchronized AbstractFoodChainState userCommand(String nickname, String req) throws Exception {
-    	String cmds[] = req.split("\\s+", 3);
+	public synchronized AbstractFoodChainState userCommand(Player p, String[] cmds) throws Exception {
+    	//String cmds[] = req.split("\\s+", 3);
     	String cmd = cmds[0].toLowerCase();
     	
     	if ( cmd.equals("/quit") ) {
-    		quit(nickname);
+    		quit(p);
     		throw new QuitGameRoomException();
     	} else if ( cmd.equals("/to") ) {
-    		whisper(nickname, cmds[1], cmds[2]);
+    		whisper(p, cmds[1], cmds[2]);
     	} else if ( cmd.equals("/info") ) {
-    		showInfo( nickname );
+    		showInfo( p );
     	} else if ( cmd.equals("/start") ) {
     		if ( getAllPlayers().size() < FoodChainCharacter.values().length ) {
     			throw new GeniusServerException("플레이어가 부족합니다. 봇을 추가하거나, 다른 플레이어의 입장을 기다려주세요.");
@@ -116,17 +118,16 @@ public class FoodChainWaitState extends AbstractFoodChainState {
     			botName = cmds[1];
     		} catch ( ArrayIndexOutOfBoundsException e ) {
     			long appendix = ( System.currentTimeMillis() % ONE_DAY_MILLI ) / 1000;
-    			botName = nickname + "_" + Long.toString(appendix); 
+    			botName = p.getId() + "_" + Long.toString(appendix); 
     		}    		
     		addBot( botName );
     	} else if ( cmd.equals("/del_bot") || cmd.equals("/del") ) {
     		removeBot();
     	} else {
-    		printUsageSimple(nickname);
+    		printUsage(p);
     	}
     	
     	return this;
 	}
-	
 
 }

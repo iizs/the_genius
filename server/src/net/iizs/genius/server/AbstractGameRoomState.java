@@ -1,8 +1,6 @@
 package net.iizs.genius.server;
 
-import static net.iizs.genius.server.Constants.NEWLINE;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
@@ -22,13 +20,15 @@ public abstract class AbstractGameRoomState {
 	private String name_;
 	private String adminPassword_;
 	private ConcurrentLinkedQueue<ScheduleRequest> jobQueue_;
+	private GeniusServerHandler server_;
 	
-	public AbstractGameRoomState() {
+	public AbstractGameRoomState(GeniusServerHandler server) {
 		name_ = "";
 		cgAllPlayers_ = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 		players_ = new ConcurrentHashMap<String, Player>();
 		adminPassword_ = Util.generatePassword();
 		jobQueue_ = new ConcurrentLinkedQueue<ScheduleRequest>();
+		server_ = server;
 	}
 	
 	public AbstractGameRoomState(AbstractGameRoomState c) {
@@ -37,12 +37,17 @@ public abstract class AbstractGameRoomState {
 		players_ = c.players_;
 		adminPassword_ = c.adminPassword_;
 		jobQueue_ = c.jobQueue_;
+		server_ = c.server_;
 	}
 	
-	protected Player getPlayer(String nickname) throws Exception {
-		Player p = players_.get(nickname);
+	protected GeniusServerHandler getServer() {
+		return server_;
+	}
+	
+	protected Player getPlayer(String id) throws Exception {
+		Player p = players_.get(id);
 		if ( p == null ) {
-			throw new GeniusServerException("[" + nickname + "]님은 존재하지 않습니다.");
+			throw new GeniusServerException( server_.getMessage("eUserNotFound", id ) );
 		}
 		return p;
 	}
@@ -61,37 +66,41 @@ public abstract class AbstractGameRoomState {
 	
 	public void broadcast(String msg) {
         for (Channel c: cgAllPlayers_) {
-        	c.writeAndFlush( "===== " + msg + NEWLINE);
+        	c.writeAndFlush( server_.getFormatter().formatGameRoomMessage(msg) );
         }
 	}
 	
-	public void chat(String nickname, String msg) throws Exception {
+	public void chat(Player p, String msg) throws Exception {
         for (Channel c: cgAllPlayers_) {
-        	c.writeAndFlush("[" + nickname + "] " + msg + NEWLINE);
+        	c.writeAndFlush( server_.getFormatter().formatChatMessage(p.getId(), msg) );
         }
 	}
 	
-	public void whisper(String nickname, String to, String msg) throws Exception {
-		Player p = getPlayer(to);
-		Player me = getPlayer(nickname);
+	public void whisper(Player p, String to, String msg) throws Exception {
+		Player toPlayer = getPlayer(to);
+		//Player me = getPlayer(nickname);
 		
-		if ( p.isBot() ) {
-			throw new GeniusServerException("[" + to + "]님은 봇입니다.");
+		if ( ! toPlayer.isBot() ) {
+			toPlayer.getChannel().writeAndFlush( server_.getFormatter().formatWhisperMessage(p.getId(), msg ) );
 		}
 		
-		p.getChannel().writeAndFlush(">>> [" + nickname + "]님의 귓속말: " + msg + NEWLINE);
-		me.getChannel().writeAndFlush( ">>> [" + to + "]님께 귓속말을 보냈습니다." + NEWLINE);
+		p.getChannel().writeAndFlush( 
+				server_.getFormatter().formatResponseMessage( 
+						new SimpleResponse( server_.getMessage( "sentWhisper", to ) ) ) );
 	}
 
 	public ConcurrentLinkedQueue<ScheduleRequest> getJobQueue() {
 		return jobQueue_;
 	}
 	
-	public abstract void quit(String nickname) throws Exception;
-	public abstract void join(String nickname, ChannelHandlerContext ctx) throws Exception;
-	public abstract AbstractGameRoomState userCommand(String nickname, String req) throws Exception;
-	public abstract void printUsageSimple(String nickname) throws Exception;
-	public abstract void showInfo(String nickname) throws Exception;
+	public abstract void quit(Player p) throws Exception;
+	public abstract void join(Player p) throws Exception;
+	public abstract void surrender(Player p) throws Exception;
+	public abstract void seat(Player p) throws Exception;
+	public abstract void stand(Player p) throws Exception;
+	public abstract AbstractGameRoomState userCommand(Player p, String[] cmds) throws Exception;
+	public abstract void printUsage(Player p) throws Exception;
+	//public abstract void showInfo(Player p) throws Exception;
 	
 	protected ChannelGroup getAllPlayersChannelGroup() {
 		return cgAllPlayers_;

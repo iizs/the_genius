@@ -126,12 +126,12 @@ public class FoodChainInitState extends AbstractFoodChainState {
 	}
 
 	@Override
-	public synchronized AbstractFoodChainState userCommand(String nickname, String req) throws Exception {
-		String cmds[] = req.split("\\s+", 3);
+	public synchronized AbstractFoodChainState userCommand(Player player, String[] cmds) throws Exception {
+		//String cmds[] = req.split("\\s+", 3);
     	String cmd = cmds[0].toLowerCase();
     	
     	if ( cmd.equals("/peep") ) {
-    		FoodChainPlayer p = getFoodChainPlayer(nickname);
+    		FoodChainPlayer p = getFoodChainPlayer(player.getId());
     		if ( cmds.length < 2 ) {
     			throw new GeniusServerException("플레이어 닉네임을 지정해야 합니다.");
     		}
@@ -147,7 +147,7 @@ public class FoodChainInitState extends AbstractFoodChainState {
     		}
     		
     	} else if ( cmd.equals("/select") ) {
-    		FoodChainPlayer p = getFoodChainPlayer(nickname);
+    		FoodChainPlayer p = getFoodChainPlayer(player.getId());
     		FoodChainCharacter c = p.getCharacter();
     		
     		if ( cmds.length < 2 ) {
@@ -164,24 +164,23 @@ public class FoodChainInitState extends AbstractFoodChainState {
     			throw new GeniusServerException("'" + c.getName() + "'는 이 명령을 실행할 수 없습니다.");
     		}
     	} else if ( cmd.equals("/to") ) {
-    		whisper(nickname, cmds[1], cmds[2]);
+    		whisper(player, cmds[1], cmds[2]);
     	} else if ( cmd.equals("/info") ) {
-    		showInfo( nickname );
+    		showInfo( player );
     	} else {
-    		printUsageSimple(nickname);
+    		printUsage(player);
     	}
     	
     	return proceed();
 	}
 
 	@Override
-	public void printUsageSimple(String nickname) throws Exception {
-		getPlayer(nickname).getChannel().writeAndFlush(INIT_USAGE_SIMPLE + NEWLINE);
+	public void printUsage(Player p) throws Exception {
+		p.getChannel().writeAndFlush(INIT_USAGE_SIMPLE + NEWLINE);
 	}
 
-	@Override
-	public void showInfo(String nickname) throws Exception {
-		FoodChainPlayer p = getFoodChainPlayer(nickname);
+	public void showInfo(Player player) throws Exception {
+		FoodChainPlayer p = getFoodChainPlayer(player.getId());
 		
 		p.getChannel().write( "> 방 번호: " + getName() + NEWLINE );
 		p.getChannel().write( "> 플레이어" + NEWLINE );

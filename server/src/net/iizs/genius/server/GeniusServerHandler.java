@@ -31,11 +31,11 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
 	static final ConcurrentMap<String, Player> cachedPlayers_ = new ConcurrentHashMap<String, Player>();
 	static final Timer jobScheduler = new Timer();
 	
-	ResourceBundle messages_;
-	ServerMessageFormatter formatter_;
+	private ResourceBundle messages_;
+	private ServerMessageFormatter formatter_;
 	
-	Player player_ = null;
-	GameRoom currentGame_ = null;
+	private Player player_ = null;
+	private GameRoom currentGame_ = null;
 	
 	//String nickname_;
 	
@@ -89,6 +89,10 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
 			logger_.warning( e.getMessage() );
 			return key;
 		}
+    }
+    
+    public ServerMessageFormatter getFormatter() {
+    	return formatter_;
     }
     
     private String[] parseCommand(String s) {
@@ -216,7 +220,7 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
     		throw new GeniusServerException( getMessage("eGameRoomNotFound", key) );
     	}
     	
-    	room.join(player_.getId(), ctx);
+    	room.join(player_);
     	currentGame_ = room;
     	cgLobby_.remove( ctx.channel() );
     	lobbyBroadcast( getMessage("exitLobby", player_.getId(), player_.getNickname() ) );
@@ -249,10 +253,8 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
     }
 
     private boolean lobbyCommand(ChannelHandlerContext ctx, String cmds[]) throws Exception {
-    	// TODO
 		String cmd = cmds[0];
     	boolean processed = false;
-    	
     	
     	if ( cmd.equals("/list") || cmd.equals("/l") ) {
     		listGameRooms(ctx, cmds);
@@ -365,14 +367,20 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
     	} else {
     		if ( request.isEmpty() ) {
     			// 게임방 도움말
-    			//currentGame_.printUsageSimple(nickname_);
+    			currentGame_.printUsage(player_);
     		} else {
 	    		if ( request.charAt(0) == '/' ) {
 	    			// 게임방 명령어
 	    			try {
-	    				// TODO
 	    				logger_.info( player_.toString() + " @ " + currentGame_.getName() + "(" + currentGame_.getGameId() + ")"  + request);
-	    				currentGame_.userCommand(""/* player가 들어가야 함*/, request);
+	    				
+	    				String cmds[] = parseCommand(request);
+	    				
+	    				if ( commonCommand( ctx, cmds ) == false ) {
+	    					currentGame_.userCommand(player_, cmds);
+	    				}
+	    				
+	    				// TODO 아래 블록의 의미를 상기할 것 필요에 따라서는 위 if  block 안 쪽으로 이동 필요
 	    				while ( ! currentGame_.getJobQueue().isEmpty() ) {
 	    					ScheduleRequest req = currentGame_.getJobQueue().poll();
 	    					ScheduledJob job = new ScheduledJob(currentGame_, player_, req.getCommand());
@@ -383,14 +391,14 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
 	    				cgLobby_.add(ctx.channel());
 	    				lobbyBroadcast( getMessage("enterLobby", player_.getId(), player_.getNickname() ) );
 	    			} catch ( GeniusServerException e ) {
-	    				ctx.channel().writeAndFlush( e.getMessage() + NEWLINE );
+	    				ctx.channel().writeAndFlush( formatter_.formatErrorMessage( e.getMessage() ) );
 	    			}
 	    		} else {
 	    			// 게임방 채팅
 	    			try {
-	    				currentGame_.chat( "" /*player */, request );
+	    				currentGame_.chat( player_, request );
 	    			} catch ( GeniusServerException e ) {
-	    				ctx.channel().writeAndFlush( e.getMessage() + NEWLINE );
+	    				ctx.channel().writeAndFlush( formatter_.formatErrorMessage( e.getMessage() ) );
 	    			}
 	    		}
     		}

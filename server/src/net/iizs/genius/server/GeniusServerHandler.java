@@ -276,8 +276,8 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
     }
     
     private void lobbyUsageSimple(ChannelHandlerContext ctx) {
-    	// TODO
-    	ctx.channel().writeAndFlush(LOBBY_USAGE_SIMPLE + NEWLINE);
+    	ctx.channel().writeAndFlush( formatter_.formatResponseMessage(
+    			new SimpleResponse( getMessage("usageLobbySimple") ) ) );
     }
 
     public static String stringToHex(String s) {

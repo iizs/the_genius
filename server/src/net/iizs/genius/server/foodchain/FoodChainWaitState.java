@@ -11,7 +11,6 @@ import net.iizs.genius.server.GeniusServerException;
 import net.iizs.genius.server.GeniusServerHandler;
 import net.iizs.genius.server.NoBotFoundException;
 import net.iizs.genius.server.Player;
-import net.iizs.genius.server.QuitGameRoomException;
 import io.netty.channel.ChannelHandlerContext;
 
 public class FoodChainWaitState extends AbstractFoodChainState {
@@ -93,7 +92,7 @@ public class FoodChainWaitState extends AbstractFoodChainState {
     	
     	if ( cmd.equals("/quit") ) {
     		quit(p);
-    		throw new QuitGameRoomException();
+    		getServer().enterLobby(p);
     	} else if ( cmd.equals("/to") ) {
     		whisper(p, cmds[1], cmds[2]);
     	} else if ( cmd.equals("/info") ) {

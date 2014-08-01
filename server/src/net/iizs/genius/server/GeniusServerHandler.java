@@ -108,6 +108,13 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
     	ctx.writeAndFlush( formatter_.formatResponseMessage( new SimpleResponse( getMessage("usageLogin") ) ) );
     }
     
+    public void enterLobby(Player p) {
+    	currentGame_ = null;
+    	cgLobby_.add(p.getChannel());
+        lobbyBroadcast( getMessage("enterLobby", player_.getId(), player_.getNickname() ) );
+        
+    }
+    
     private void loginCommand(ChannelHandlerContext ctx, String request) throws Exception {
     	String cmds[] = parseCommand(request);
 		String cmd = cmds[0];
@@ -125,9 +132,8 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
     			// TODO 진행중인 게임이 있었다면, 자동으로 참가하게 하는 것은 어떨까?
     	        
     	        cgAllUsers_.add(ctx.channel());
-    	        cgLobby_.add(ctx.channel());
-    			
-    	        lobbyBroadcast( getMessage("enterLobby", player_.getId(), player_.getNickname() ) );
+    	        
+    	        enterLobby(player_);
     	        
     	        logger_.info(player_.toString() + " @ " + player_.getChannel().toString() + " logged in");
     		} else {
@@ -320,7 +326,6 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, String request) throws Exception {
-    	// TODO
     	if ( player_ == null ) {
     		// login 단계
     		if ( request.isEmpty() ) {
@@ -390,10 +395,6 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
 	    					ScheduledJob job = new ScheduledJob(currentGame_, player_, req.getCommand());
 	    					jobScheduler.schedule(job, req.getDelay());
 	    				}
-	    			} catch ( QuitGameRoomException q ) {
-	    				currentGame_ = null;
-	    				cgLobby_.add(ctx.channel());
-	    				lobbyBroadcast( getMessage("enterLobby", player_.getId(), player_.getNickname() ) );
 	    			} catch ( GeniusServerException e ) {
 	    				ctx.channel().writeAndFlush( formatter_.formatErrorMessage( e.getMessage() ) );
 	    			}

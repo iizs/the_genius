@@ -104,6 +104,12 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
     	// TODO newline 처리
     	String cmds[] = s.split("\\s+");
     	cmds[0] = cmds[0].toLowerCase();
+    	
+    	if ( cmds[0].equals("/to") ) {
+    		// /to command must be parsed into three part 
+    		cmds = s.split("\\s+", 3);
+        	cmds[0] = cmds[0].toLowerCase();
+    	}
     	return cmds;
     }
     

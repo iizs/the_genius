@@ -59,6 +59,4 @@ public class Player {
 	public String toString() {
 		return "Player [" + nickname_ + "(" + id_ + ")]";
 	}
-
-	
 }

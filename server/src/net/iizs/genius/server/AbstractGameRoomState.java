@@ -1,5 +1,6 @@
 package net.iizs.genius.server;
 
+import static net.iizs.genius.server.foodchain.FoodChainConstants.ONE_DAY_MILLI;
 import io.netty.channel.Channel;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
@@ -16,6 +17,8 @@ import java.util.logging.Logger;
 import net.iizs.genius.server.GeniusServerException;
 import net.iizs.genius.server.ScheduleRequest;
 import net.iizs.genius.server.Util;
+import net.iizs.genius.server.foodchain.FoodChainCharacter;
+import net.iizs.genius.server.foodchain.FoodChainInitState;
 
 
 public abstract class AbstractGameRoomState {
@@ -106,6 +109,10 @@ public abstract class AbstractGameRoomState {
     public Logger getLogger() {
     	return getServer().getLogger();
     }
+    
+    public ServerMessageFormatter getFormatter() {
+    	return getServer().getFormatter();
+    }
 	
 	public void setName(String n) {
 		name_ = n;
@@ -133,7 +140,10 @@ public abstract class AbstractGameRoomState {
 	
 	public void whisper(Player p, String to, String msg) throws Exception {
 		Player toPlayer = getPlayer(to);
-		//Player me = getPlayer(nickname);
+		
+		if ( toPlayer == null ) {
+			throw new GeniusServerException( getMessage("eUserNotFound", to) );
+		}
 		
 		if ( ! toPlayer.isBot() ) {
 			toPlayer.getChannel().writeAndFlush( server_.getFormatter().formatWhisperMessage(p.getId(), msg ) );
@@ -153,9 +163,29 @@ public abstract class AbstractGameRoomState {
 	public abstract void surrender(Player p) throws Exception;
 	public abstract void seat(Player p) throws Exception;
 	public abstract void stand(Player p) throws Exception;
-	public abstract AbstractGameRoomState userCommand(Player p, String[] cmds) throws Exception;
 	public abstract void printUsage(Player p) throws Exception;
-	//public abstract void showInfo(Player p) throws Exception;
+	public abstract void showInfo(Player p) throws Exception;
+	
+	public AbstractGameRoomState userCommand(Player p, String[] cmds) throws Exception {
+		String cmd = cmds[0].toLowerCase();
+    	
+    	if ( cmd.equals("/to") ) {
+    		whisper(p, cmds[1], cmds[2]);
+    	} else if ( cmd.equals("/info") ) {
+    		showInfo( p );
+    	} else if ( cmd.equals("/seat") ) {
+    		seat( p );
+    	} else if ( cmd.equals("/quit") || cmd.equals("/leave") ) {
+    		quit(p);
+    		backToLobby(p);
+    	} else if ( cmd.equals("/surrender") || cmd.equals("/gg") ) {
+    		surrender(p);
+    	} else if ( cmd.equals("/stand") || cmd.equals("/watch") ) {
+    		stand(p);
+    	}	
+    	
+    	return this;
+	}
 	
 	protected ChannelGroup getAllPlayersChannelGroup() {
 		return cgAllPlayers_;

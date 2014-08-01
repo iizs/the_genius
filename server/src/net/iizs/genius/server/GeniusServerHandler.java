@@ -380,7 +380,11 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
 	    					currentGame_.userCommand(player_, cmds);
 	    				}
 	    				
-	    				// TODO 아래 블록의 의미를 상기할 것 필요에 따라서는 위 if  block 안 쪽으로 이동 필요
+	    				// TODO attack state 에서 시간제한을 두기 위해 사용했음. 
+	    				// 하지만 이제는 server instance 가 state instance 에 전파되므로, 
+	    				// state에서 직접 server의 schedule 함수를 호출하는 방식도 가능할 것 같음
+	    				// 특히 현 방식은 플레이어중 최소 1명이 명령을 내려야만 진행이 가능한 구조라는 문제점도 있음
+	    				// 위와 같이 변경하면 해당 문제도 해결 가능할 듯
 	    				while ( ! currentGame_.getJobQueue().isEmpty() ) {
 	    					ScheduleRequest req = currentGame_.getJobQueue().poll();
 	    					ScheduledJob job = new ScheduledJob(currentGame_, player_, req.getCommand());

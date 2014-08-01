@@ -32,8 +32,8 @@ public abstract class AbstractFoodChainState extends AbstractGameRoomState {
 	
 	@Override
 	public void join(Player p) throws Exception {
-		throw new GeniusServerException( getServer().getMessage("eJoinFailed", getName() )
-				+ "; "  + getServer().getMessage("eGameIsPlaying") );
+		throw new GeniusServerException( getMessage("eJoinFailed", getName() )
+				+ "; "  + getMessage("eGameIsPlaying") );
 	}
 	
 	// 이 게임은 방에서 나가는 순간 게임을 포기하는 것으로 간주한다.
@@ -46,25 +46,25 @@ public abstract class AbstractFoodChainState extends AbstractGameRoomState {
 	@Override
 	public void surrender(Player p) throws Exception {
 		getAllPlayersChannelGroup().remove( p.getChannel() );
-		broadcast( getServer().getMessage("exitGameRoom", p.getId()) );
+		broadcast( getMessage("exitGameRoom", p.getId()) );
 		
 		getPlayer(p.getId()).becomeBot();
-		broadcast( getServer().getMessage("botReplacesPlayer", p.getId()) );
+		broadcast( getMessage("botReplacesPlayer", p.getId()) );
 	}
 	
 	@Override
 	public void seat(Player p) throws Exception {
 		if ( getPlayer(p.getId())  != null ) {
-			throw new GeniusServerException( getServer().getMessage("eAlreadySeated", getName() ) );
+			throw new GeniusServerException( getMessage("eAlreadySeated", getName() ) );
 		}
 		
-		throw new GeniusServerException( getServer().getMessage("eSeatFailed", getName() )
-				+ "; "  + getServer().getMessage("eGameIsPlaying") );
+		throw new GeniusServerException( getMessage("eSeatFailed", getName() )
+				+ "; "  + getMessage("eGameIsPlaying") );
 	}
 
 	@Override
 	public void stand(Player p) throws Exception {
-		throw new GeniusServerException( getServer().getMessage("eStandNotAllowed", getName() ) );
+		throw new GeniusServerException( getMessage("eStandNotAllowed", getName() ) );
 	}
 
 	protected FoodChainPlayer getFoodChainPlayer(String n) throws Exception {

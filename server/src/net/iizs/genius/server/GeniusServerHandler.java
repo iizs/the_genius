@@ -95,6 +95,10 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
     	return formatter_;
     }
     
+    public Logger getLogger() {
+    	return logger_;
+    }
+    
     private String[] parseCommand(String s) {
     	// TODO 따옴표 인자 처리
     	// TODO newline 처리

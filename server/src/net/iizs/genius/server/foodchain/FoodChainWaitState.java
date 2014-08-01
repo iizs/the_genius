@@ -92,7 +92,7 @@ public class FoodChainWaitState extends AbstractFoodChainState {
     	
     	if ( cmd.equals("/quit") ) {
     		quit(p);
-    		getServer().enterLobby(p);
+    		backToLobby(p);
     	} else if ( cmd.equals("/to") ) {
     		whisper(p, cmds[1], cmds[2]);
     	} else if ( cmd.equals("/info") ) {

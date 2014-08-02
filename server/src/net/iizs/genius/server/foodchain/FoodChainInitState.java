@@ -180,9 +180,7 @@ public class FoodChainInitState extends AbstractFoodChainState {
     		whisper(player, cmds[1], cmds[2]);
     	} else if ( cmd.equals("/info") ) {
     		showInfo( player );
-    	} else {
-    		printUsage(player);
-    	}
+    	} 
     	
     	return proceed();
 	}

@@ -138,7 +138,7 @@ public class FoodChainMoveState extends AbstractFoodChainState {
 		FoodChainPlayer p = getFoodChainPlayer(player.getId());
         for (FoodChainPlayer to: minimap_.get(p.getCurrentArea())) {
         	if ( to.isBot() ) continue;
-        	to.getChannel().writeAndFlush("[" + player.getId() + "] " + msg + NEWLINE);
+        	to.getChannel().writeAndFlush( getFormatter().formatChatMessage(p.getId(), msg) );
         }
 	}
 	

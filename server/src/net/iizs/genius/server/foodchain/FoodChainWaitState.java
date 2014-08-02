@@ -46,11 +46,7 @@ public class FoodChainWaitState extends AbstractFoodChainState {
 	@Override
 	public void quit(Player player) throws Exception {
 		FoodChainPlayer p = getFoodChainPlayer(player.getId());
-		
-		if ( p == null ) {
-			throw new GeniusServerException( getMessage("eUserNotFound", player.getId()) );
-		}
-		
+
 		getAllPlayersChannelGroup().remove( p.getChannel() );
 		broadcast( getMessage("quit", p.getId()) );
 	

@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import net.iizs.genius.server.GeniusServerException;
 import net.iizs.genius.server.Player;
 import io.netty.channel.Channel;
 
@@ -66,10 +65,10 @@ public class FoodChainPlayer extends Player {
 	
 	public void addPeep(String nick) throws Exception {
 		if ( peeps_.size() == character_.getPeepingCount() ) {
-			throw new GeniusServerException("더 이상 엿보기를 실행할 수 없습니다; " + peeps_.toString() );
+			throw new NoMorePeepAllowedException();
 		}
-		if ( nick.equals(getNickname()) ) {
-			throw new GeniusServerException("자기 자신을 엿볼 수는 없습니다; " + peeps_.toString() );
+		if ( nick.equals(getId()) ) {
+			throw new CannotPeepYourselfException();
 		}
 		peeps_.add(nick);
 	}
@@ -105,7 +104,7 @@ public class FoodChainPlayer extends Player {
 
 	@Override
 	public String toString() {
-		return getNickname();
+		return getId();
 	}	
 	
 	public void setPassed(boolean b) {

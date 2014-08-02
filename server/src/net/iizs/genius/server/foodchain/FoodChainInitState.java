@@ -17,6 +17,7 @@ import static net.iizs.genius.server.Constants.NEWLINE;
 public class FoodChainInitState extends AbstractFoodChainState {
 
 	public FoodChainInitState(AbstractFoodChainState cl) {
+		// TODO 
 		super(cl);
 		
 		round_ = 0;
@@ -136,7 +137,13 @@ public class FoodChainInitState extends AbstractFoodChainState {
     		if ( cmds.length < 2 ) {
     			printUsage( player );
     		} else {
-	    		p.addPeep(getPlayer(cmds[1]).getId());
+    			try {
+    				p.addPeep( getPlayer(cmds[1]).getId());
+    			} catch ( NoMorePeepAllowedException e ) {
+    				throw new GeniusServerException( getMessage( "eNoMorePeepAllowed", p.getPeeps().toString() ) );
+    			} catch ( CannotPeepYourselfException e ) {
+    				throw new GeniusServerException( getMessage( "eCannotPeepYourself", p.getPeeps().toString() ) );
+    			}
 	    		
 	    		p.getChannel().writeAndFlush( getFormatter().formatResponseMessage(
 	    				new SimpleResponse( getMessage( "peepSet", cmds[1] ) ) ) );

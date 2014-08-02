@@ -121,7 +121,7 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
     public void enterLobby(Player p) {
     	currentGame_ = null;
     	cgLobby_.add(p.getChannel());
-        lobbyBroadcast( getMessage("enterLobby", player_.getId(), player_.getNickname() ) );
+        lobbyBroadcast( getMessage("enterLobby", player_.getId() ) );
         
     }
     
@@ -239,7 +239,7 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
     	room.join(player_);
     	currentGame_ = room;
     	cgLobby_.remove( ctx.channel() );
-    	lobbyBroadcast( getMessage("exitLobby", player_.getId(), player_.getNickname() ) );
+    	lobbyBroadcast( getMessage("exitLobby", player_.getId() ) );
     }
     
     private void createGameRoom(ChannelHandlerContext ctx, String[] cmds) throws Exception {
@@ -326,7 +326,7 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
     	// TODO
 		super.channelInactive(ctx);
 		if ( currentGame_ == null ) {
-			lobbyBroadcast( getMessage("exitLobby", player_.getId(), player_.getNickname() ) );
+			lobbyBroadcast( getMessage("exitLobby", player_.getId() ) );
 		} else {
 			//currentGame_.quit(nickname_);
 		}

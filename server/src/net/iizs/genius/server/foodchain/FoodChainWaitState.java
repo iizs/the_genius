@@ -108,7 +108,7 @@ public class FoodChainWaitState extends AbstractFoodChainState {
     	while ( iter.hasNext() ) {    		
     		FoodChainPlayer i = getFoodChainPlayer(iter.next());
     		
-    		p.getChannel().write("> [" + i.getNickname() + "]");
+    		p.getChannel().write("> [" + i.getId() + "]");
     		if ( i.isBot() ) {
     			p.getChannel().write( " (Bot)");
     		}

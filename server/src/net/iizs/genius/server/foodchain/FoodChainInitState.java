@@ -17,7 +17,6 @@ import static net.iizs.genius.server.Constants.NEWLINE;
 public class FoodChainInitState extends AbstractFoodChainState {
 
 	public FoodChainInitState(AbstractFoodChainState cl) {
-		// TODO 
 		super(cl);
 		
 		round_ = 0;
@@ -51,21 +50,20 @@ public class FoodChainInitState extends AbstractFoodChainState {
 			}
 			
 			if ( ! p.isBot() ) {
-				p.getChannel().writeAndFlush(">>> 당신은 '" + c.getName() + "' 입니다." + NEWLINE );
-				p.getChannel().writeAndFlush(">>> 주서식지: " + c.getHabitat().getName() + NEWLINE );
-				p.getChannel().writeAndFlush(">>> 이동가능: 들, 숲, 강" + ( c.isFlyable() ? ", 하늘" : "" ) + NEWLINE );
-				p.getChannel().writeAndFlush(">>> 승리조건: " + c.winningCondition() + NEWLINE );
-				p.getChannel().writeAndFlush(">>> 패배조건: " + c.losingCondition() + NEWLINE );
-				p.getChannel().writeAndFlush(">>> 특이사항: " + c.note() + NEWLINE );
+				// TODO "하늘" 에 대한 i18n 필요
+				p.getChannel().writeAndFlush( getFormatter().formatGameRoomMessage( 
+						getMessage( "characterGuide"
+								, c.getName()
+								, c.getHabitat().getName()
+								, ( c.isFlyable() ? ", 하늘" : "" )
+								, c.winningCondition()
+								, c.losingCondition()
+								, c.note()
+								) ) );
 			}
 		}
 		
-		broadcast("각 플레이어들은 /peep [닉네임] 명령으로 엿보기를 실행해주세요.");
-		broadcast("2회 엿보기가 가능한 플레이어들은 /peep 명령을 두 번 실행하시면 됩니다.");
-		broadcast("'까마귀'는 /select [동물이름] 명령으로 우승자를 지목해 주세요.");
-		broadcast("'카멜레온'은 /select [동물이름] 명령으로 위장할 동물을 선택해주세요.");
-		broadcast("엿보기 결과는 모든 플레이어가 각자의 명령을 실행한 다음 동시에 공개됩니다.");
-		
+		broadcast( getMessage("initStateGuide") );	
 	}
 	
 	private AbstractFoodChainState proceed() throws Exception {

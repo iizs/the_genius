@@ -68,7 +68,11 @@ public abstract class AbstractFoodChainState extends AbstractGameRoomState {
 	}
 
 	protected FoodChainPlayer getFoodChainPlayer(String n) throws Exception {
-		return (FoodChainPlayer) getPlayer(n);
+		FoodChainPlayer p = (FoodChainPlayer) getPlayer(n);
+		if ( p == null ) {
+			throw new GeniusServerException( getMessage("eUserNotFound", getName() ) );
+		}
+		return p;
 	}
 
 }

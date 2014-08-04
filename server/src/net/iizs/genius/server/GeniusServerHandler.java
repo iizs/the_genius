@@ -311,7 +311,8 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
     	messages_ = ResourceBundle.getBundle("i18n.ServerMessages");
     	formatter_ = ServerMessageFormatter.getInstance("TextFormatter")
-    				.registerCustomFormatter(ListResponse.class, new ListResponseFormatter());
+    				.registerCustomFormatter(ListResponse.class, new ListResponseFormatter())
+    				.registerCustomFormatter(KeyValueResponse.class, new KeyValueResponseFormatter());
         
     	// Send greeting for a new connection.
         ctx.writeAndFlush( formatter_.formatResponseMessage( new SimpleResponse( getMessage("greetings") ) ) );

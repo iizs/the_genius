@@ -18,6 +18,7 @@ public class FoodChainWaitState extends AbstractFoodChainState {
 	
 	public FoodChainWaitState(GeniusServerHandler server) {
 		super(server);
+		setMessageBundle("i18n.FoodChainMessages");
 	}
 
 	public FoodChainWaitState(AbstractFoodChainState c) {

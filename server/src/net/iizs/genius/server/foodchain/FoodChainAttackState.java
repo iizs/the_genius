@@ -154,12 +154,12 @@ public class FoodChainAttackState extends AbstractFoodChainState {
 					}
 				}
 				
-				broadcast("");
+				//broadcast("");
 				for ( Player ap: getAllPlayers().values() ) {
 					FoodChainPlayer p = (FoodChainPlayer) ap;
 					broadcast( "[" + p.getId() + "] = '" + p.getCharacter().getName() + "'" );
 				}
-				broadcast("");
+				//broadcast("");
 				broadcast( getMessage("winner", winner.toString() ) );
 				
 				logger_.info("Winners: " + winner.toString());
@@ -174,7 +174,8 @@ public class FoodChainAttackState extends AbstractFoodChainState {
 	private void broadcastToArea(FoodChainArea a, String msg) {
         for (FoodChainPlayer p: minimap_.get(a)) {
         	if ( p.isBot() ) { continue; }
-        	p.getChannel().writeAndFlush( "((( " + msg +  " )))" );
+        	p.getChannel().writeAndFlush( 
+        			getFormatter().formatGameRoomMessage( "((( " + msg +  " )))" ) );
         }
 	}
 	

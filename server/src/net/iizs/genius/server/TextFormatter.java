@@ -7,7 +7,7 @@ import java.util.HashMap;
 
 public class TextFormatter extends ServerMessageFormatter {
 	
-	private HashMap<Type, CustomTextFormatter<?>> customFormatters_;
+	private HashMap<Type, CustomTextFormatter<AbstractResponse>> customFormatters_;
 	
 	public TextFormatter() {
 		customFormatters_ = new HashMap<>();
@@ -66,10 +66,11 @@ public class TextFormatter extends ServerMessageFormatter {
 		return new String( "| " + resp.getMessage() + NEWLINE );
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public ServerMessageFormatter registerCustomFormatter(Type type, Object customFormatter) {
 		if ( customFormatter instanceof CustomTextFormatter ) {
-			customFormatters_.put(type, (CustomTextFormatter<?>) customFormatter);
+			customFormatters_.put(type, (CustomTextFormatter<AbstractResponse>) customFormatter);
 		}
 		return this;
 	}

@@ -22,9 +22,12 @@ public class FoodChainInitState extends AbstractFoodChainState {
 		round_ = 0;
 		kills_ = 0;
 		minimap_ = new HashMap<FoodChainArea,List<FoodChainPlayer>>();
+		areaNameMap_ = new HashMap<String,FoodChainArea>();
 		for ( FoodChainArea a : FoodChainArea.values() ) {
 			minimap_.put(a, new ArrayList<FoodChainPlayer>());
+			areaNameMap_.put( getName(a), a );
 		}
+		
 		herbivores_ = new HashSet<FoodChainPlayer>();
 		charmap_ = new HashMap<FoodChainCharacter,FoodChainPlayer>();
 		
@@ -50,12 +53,11 @@ public class FoodChainInitState extends AbstractFoodChainState {
 			}
 			
 			if ( ! p.isBot() ) {
-				// TODO "하늘" 에 대한 i18n 필요
 				p.getChannel().writeAndFlush( getFormatter().formatGameRoomMessage( 
 						getMessage( "characterGuide"
 								, c.getName()
-								, c.getHabitat().getName()
-								, ( c.isFlyable() ? ", 하늘" : "" )
+								, getMessage( c.getHabitat().getId() )
+								, ( c.isFlyable() ? ", " + getName( FoodChainArea.SKY ) : "" )
 								, c.winningCondition()
 								, c.losingCondition()
 								, c.note()

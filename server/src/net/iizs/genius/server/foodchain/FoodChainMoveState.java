@@ -56,7 +56,7 @@ public class FoodChainMoveState extends AbstractFoodChainState {
 			for ( Player ap: getAllPlayers().values() ) {
 				FoodChainPlayer p = (FoodChainPlayer) ap;
 				if ( ! p.isAlive() ) continue;
-				broadcast( getMessage( "moveResult", p.getId(), p.getMoves().get( round_ - 1 ).getName() ) );
+				broadcast( getMessage( "moveResult", p.getId(), getName( p.getMoves().get( round_ - 1 ) ) ) );
 			}
 			
 			return new FoodChainAttackState(this);
@@ -77,15 +77,15 @@ public class FoodChainMoveState extends AbstractFoodChainState {
     			printUsage(player);
     		} else {
     		
-	    		if ( cmds[1].equals(FoodChainArea.HALL.getName()) ) {
+	    		if ( cmds[1].equals( getName( FoodChainArea.HALL ) ) ) {
 	    			throw new GeniusServerException( getMessage( "eCannotMoveToHall" ) );
 	    		}
 	    		
-	    		if ( cmds[1].equals(FoodChainArea.SKY.getName()) && ( ! p.getCharacter().isFlyable() ) ) {
+	    		if ( cmds[1].equals( getName( FoodChainArea.SKY ) ) && ( ! p.getCharacter().isFlyable() ) ) {
 	    			throw new GeniusServerException( getMessage( "eCannotMoveToSky" ) );
 	    		}
 	    		
-	    		p.addMove(round_, FoodChainArea.getAreaOf(cmds[1]));
+	    		p.addMove(round_, getAreaOf(cmds[1]));
 	    		p.getChannel().writeAndFlush( getFormatter().formatResponseMessage(
 	    				new SimpleResponse( getMessage("moveSet", cmds[1] ) ) ) );
     		}
@@ -125,10 +125,10 @@ public class FoodChainMoveState extends AbstractFoodChainState {
     		p.getChannel().write( NEWLINE );
     	}
     	
-    	p.getChannel().write( FoodChainArea.PLAINS.getName() + ": " + minimap_.get(FoodChainArea.PLAINS).toString() + NEWLINE );
-    	p.getChannel().write( FoodChainArea.WOODS.getName() + ": " + minimap_.get(FoodChainArea.WOODS).toString() + NEWLINE );
-    	p.getChannel().write( FoodChainArea.SKY.getName() + ": " + minimap_.get(FoodChainArea.SKY).toString() + NEWLINE );
-		p.getChannel().write( FoodChainArea.RIVER.getName() + ": " + minimap_.get(FoodChainArea.RIVER).toString() + NEWLINE  );
+    	p.getChannel().write( getName( FoodChainArea.PLAINS ) + ": " + minimap_.get(FoodChainArea.PLAINS).toString() + NEWLINE );
+    	p.getChannel().write( getName( FoodChainArea.WOODS ) + ": " + minimap_.get(FoodChainArea.WOODS).toString() + NEWLINE );
+    	p.getChannel().write( getName( FoodChainArea.SKY ) + ": " + minimap_.get(FoodChainArea.SKY).toString() + NEWLINE );
+		p.getChannel().write( getName( FoodChainArea.RIVER ) + ": " + minimap_.get(FoodChainArea.RIVER).toString() + NEWLINE  );
     	
     	p.getChannel().flush();
 	}

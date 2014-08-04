@@ -17,6 +17,8 @@ public abstract class AbstractFoodChainState extends AbstractGameRoomState {
 	protected Set<FoodChainPlayer> herbivores_;
 	protected Map<FoodChainCharacter,FoodChainPlayer> charmap_;
 	
+	protected Map<String, FoodChainArea> areaNameMap_;
+	
 	public AbstractFoodChainState(GeniusServerHandler server) {
 		super(server);
 	}
@@ -28,6 +30,7 @@ public abstract class AbstractFoodChainState extends AbstractGameRoomState {
 		herbivores_ = c.herbivores_;
 		charmap_ = c.charmap_;
 		kills_ = c.kills_;
+		areaNameMap_ = c.areaNameMap_;
 	}
 	
 	@Override
@@ -73,6 +76,21 @@ public abstract class AbstractFoodChainState extends AbstractGameRoomState {
 			throw new GeniusServerException( getMessage("eUserNotFound", getName() ) );
 		}
 		return p;
+	}
+	
+	
+	public FoodChainArea getAreaOf(String name) throws Exception {
+		FoodChainArea a = areaNameMap_.get(name);
+		
+		if ( a == null ) {
+			throw new GeniusServerException( getMessage("eAreaNotFound", name ) );
+		}
+		
+		return a;
+	}
+	
+	public String getName(FoodChainArea area) {
+		return getMessage(area.getId());
 	}
 
 }

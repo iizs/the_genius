@@ -53,10 +53,10 @@ public class FoodChainAttackState extends AbstractFoodChainState {
 		
 		broadcast( getMessage( "attackStateGuide"
 						, round_
-						, ( FoodChainArea.PLAINS.getName() + ": " + minimap_.get(FoodChainArea.PLAINS).toString() )
-						, ( FoodChainArea.WOODS.getName() + ": " + minimap_.get(FoodChainArea.WOODS).toString() )
-						, ( FoodChainArea.SKY.getName() + ": " + minimap_.get(FoodChainArea.SKY).toString() )
-						, ( FoodChainArea.RIVER.getName() + ": " + minimap_.get(FoodChainArea.RIVER).toString() )
+						, ( getName( FoodChainArea.PLAINS ) + ": " + minimap_.get(FoodChainArea.PLAINS).toString() )
+						, ( getName( FoodChainArea.WOODS ) + ": " + minimap_.get(FoodChainArea.WOODS).toString() )
+						, ( getName( FoodChainArea.SKY ) + ": " + minimap_.get(FoodChainArea.SKY).toString() )
+						, ( getName( FoodChainArea.RIVER ) + ": " + minimap_.get(FoodChainArea.RIVER).toString() )
 						, ( ATTACK_TIME_LIMIT_SECOND / 60 ) ) );
 		
 		logger_.info("@" + getName() + ": " + round_ + " starts");
@@ -318,10 +318,10 @@ public class FoodChainAttackState extends AbstractFoodChainState {
     		p.getChannel().write( NEWLINE );
     	}
     	
-    	p.getChannel().write( FoodChainArea.PLAINS.getName() + ": " + minimap_.get(FoodChainArea.PLAINS).toString() + NEWLINE );
-    	p.getChannel().write( FoodChainArea.WOODS.getName() + ": " + minimap_.get(FoodChainArea.WOODS).toString() + NEWLINE );
-    	p.getChannel().write( FoodChainArea.SKY.getName() + ": " + minimap_.get(FoodChainArea.SKY).toString() + NEWLINE );
-		p.getChannel().write( FoodChainArea.RIVER.getName() + ": " + minimap_.get(FoodChainArea.RIVER).toString() + NEWLINE  );
+    	p.getChannel().write( getName( FoodChainArea.PLAINS ) + ": " + minimap_.get(FoodChainArea.PLAINS).toString() + NEWLINE );
+    	p.getChannel().write( getName( FoodChainArea.WOODS ) + ": " + minimap_.get(FoodChainArea.WOODS).toString() + NEWLINE );
+    	p.getChannel().write( getName( FoodChainArea.SKY ) + ": " + minimap_.get(FoodChainArea.SKY).toString() + NEWLINE );
+		p.getChannel().write( getName( FoodChainArea.RIVER ) + ": " + minimap_.get(FoodChainArea.RIVER).toString() + NEWLINE  );
     	
     	p.getChannel().flush();
 	}

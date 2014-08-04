@@ -1,6 +1,5 @@
 package net.iizs.genius.server;
 
-import static net.iizs.genius.server.foodchain.FoodChainConstants.ONE_DAY_MILLI;
 import io.netty.channel.Channel;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
@@ -17,8 +16,6 @@ import java.util.logging.Logger;
 import net.iizs.genius.server.GeniusServerException;
 import net.iizs.genius.server.ScheduleRequest;
 import net.iizs.genius.server.Util;
-import net.iizs.genius.server.foodchain.FoodChainCharacter;
-import net.iizs.genius.server.foodchain.FoodChainInitState;
 
 
 public abstract class AbstractGameRoomState {

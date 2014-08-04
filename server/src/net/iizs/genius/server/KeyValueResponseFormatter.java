@@ -12,7 +12,8 @@ public class KeyValueResponseFormatter implements CustomTextFormatter<KeyValueRe
 		List<?> keys = src.keyList();
 		String resp = "";
 		for ( int i=0; i < keys.size(); ++i ) {
-			resp += "| " + keys.get(i).toString() + " = " + src.get( keys.get(i) ) + NEWLINE;
+			resp += "| " + keys.get(i).toString() + " = " 
+					+ src.get( keys.get(i) ).toString() + NEWLINE;
 		}
 		return resp;
 	}

@@ -387,7 +387,7 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
 	    		if ( request.charAt(0) == '/' ) {
 	    			// 게임방 명령어
 	    			try {
-	    				logger_.info( player_.toString() + " @ " + currentGame_.getName() + "(" + currentGame_.getGameId() + ")"  + request);
+	    				logger_.info( player_.toString() + " @ " + currentGame_.getName() + "(" + currentGame_.getGameId() + ") "  + request);
 	    				
 	    				String cmds[] = parseCommand(request);
 	    				

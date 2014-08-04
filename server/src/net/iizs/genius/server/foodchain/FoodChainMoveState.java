@@ -36,7 +36,7 @@ public class FoodChainMoveState extends AbstractFoodChainState {
 			// 봇들의 선택을 랜덤으로 추가
 			for ( Player ap: getAllPlayers().values() ) {
 				FoodChainPlayer p = (FoodChainPlayer) ap;
-				if ( p.isBot() ) {
+				if ( p.isBot() && p.isAlive() ) {
 					p.addMove(round_, p.getCharacter().getHabitat());
 				}
 			}
@@ -76,6 +76,9 @@ public class FoodChainMoveState extends AbstractFoodChainState {
     		if ( cmds.length < 2 ) {
     			printUsage(player);
     		} else {
+    			if ( ! p.isAlive() ) {
+    				throw new GeniusServerException( getMessage("eYouAreDead") );
+    			}
     		
 	    		if ( cmds[1].equals( getName( FoodChainArea.HALL ) ) ) {
 	    			throw new GeniusServerException( getMessage( "eCannotMoveToHall" ) );
@@ -106,7 +109,7 @@ public class FoodChainMoveState extends AbstractFoodChainState {
 	
 	private String movesToString(List<FoodChainArea> moves) {
 		String s = "[";
-		for ( int i = 0; i < round_ - 1 ; ++i ) {
+		for ( int i = 0; i < round_ - 1 && i < moves.size() ; ++i ) {
 			if ( i != 0 ) {
 				s += "->";
 			}
@@ -151,7 +154,9 @@ public class FoodChainMoveState extends AbstractFoodChainState {
     	}
     	
     	for ( FoodChainArea area : minimap_.keySet() ) {
-    		resp.put( getName( area ), minimap_.get(area).toString() );
+    		if ( area != FoodChainArea.HALL ) {
+    			resp.put( getName( area ), minimap_.get(area).toString() );
+    		}
     	}
     	
 		player.getChannel().writeAndFlush( getFormatter().formatResponseMessage(resp));

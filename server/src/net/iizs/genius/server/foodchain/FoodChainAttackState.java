@@ -297,7 +297,7 @@ public class FoodChainAttackState extends AbstractFoodChainState {
 	
 	private String movesToString(List<FoodChainArea> moves) {
 		String s = "[";
-		for ( int i = 0; i < round_ ; ++i ) {
+		for ( int i = 0; i < round_ && i < moves.size() ; ++i ) {
 			if ( i != 0 ) {
 				s += "->";
 			}
@@ -342,7 +342,9 @@ public class FoodChainAttackState extends AbstractFoodChainState {
     	}
     	
     	for ( FoodChainArea area : minimap_.keySet() ) {
-    		resp.put( getName( area ), minimap_.get(area).toString() );
+    		if ( area != FoodChainArea.HALL ) {
+    			resp.put( getName( area ), minimap_.get(area).toString() );
+    		}
     	}
     	
 		player.getChannel().writeAndFlush( getFormatter().formatResponseMessage(resp));

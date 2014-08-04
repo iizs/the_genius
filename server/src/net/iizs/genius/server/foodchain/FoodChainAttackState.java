@@ -13,7 +13,6 @@ import net.iizs.genius.server.GeniusServerHandler;
 import net.iizs.genius.server.GeniusServerException;
 import net.iizs.genius.server.KeyValueResponse;
 import net.iizs.genius.server.Player;
-import net.iizs.genius.server.ScheduleRequest;
 import net.iizs.genius.server.SimpleResponse;
 
 public class FoodChainAttackState extends AbstractFoodChainState {
@@ -48,8 +47,8 @@ public class FoodChainAttackState extends AbstractFoodChainState {
 			invincibleHerbivores_ = true;
 		}
 		
-		getJobQueue().add(new ScheduleRequest("/admin " + getAdminPassword() + " end " + Integer.toString(round_)
-						, ATTACK_TIME_LIMIT_SECOND * 1000));
+		queueCommand("/admin " + getAdminPassword() + " end " + Integer.toString(round_)
+					, ATTACK_TIME_LIMIT_SECOND * 1000);
 		
 		broadcast( getMessage( "attackStateGuide"
 						, round_

@@ -9,21 +9,17 @@ import java.io.UnsupportedEncodingException;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Logger;
 
 import net.iizs.genius.server.GeniusServerException;
-import net.iizs.genius.server.ScheduleRequest;
 import net.iizs.genius.server.Util;
-
 
 public abstract class AbstractGameRoomState {
 	private ChannelGroup cgAllPlayers_;
 	private ConcurrentMap<String, Player> players_;
 	private String name_;
 	private String adminPassword_;
-	private ConcurrentLinkedQueue<ScheduleRequest> jobQueue_;
 	private GeniusServerHandler server_;
 	private ResourceBundle messages_;
 	
@@ -32,7 +28,6 @@ public abstract class AbstractGameRoomState {
 		cgAllPlayers_ = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 		players_ = new ConcurrentHashMap<String, Player>();
 		adminPassword_ = Util.generatePassword();
-		jobQueue_ = new ConcurrentLinkedQueue<ScheduleRequest>();
 		server_ = server;
 		messages_ = null;
 	}
@@ -47,7 +42,6 @@ public abstract class AbstractGameRoomState {
 		cgAllPlayers_ = c.cgAllPlayers_;
 		players_ = c.players_;
 		adminPassword_ = c.adminPassword_;
-		jobQueue_ = c.jobQueue_;
 		server_ = c.server_;
 		messages_ = c.messages_;
 	}
@@ -110,6 +104,10 @@ public abstract class AbstractGameRoomState {
     public ServerMessageFormatter getFormatter() {
     	return getServer().getFormatter();
     }
+    
+    public void queueCommand(String c, long delay) {
+    	getServer().queueCommand(c, delay);
+    }
 	
 	public void setName(String n) {
 		name_ = n;
@@ -149,10 +147,6 @@ public abstract class AbstractGameRoomState {
 		p.getChannel().writeAndFlush( 
 				server_.getFormatter().formatResponseMessage( 
 						new SimpleResponse( server_.getMessage( "sentWhisper", to ) ) ) );
-	}
-
-	public ConcurrentLinkedQueue<ScheduleRequest> getJobQueue() {
-		return jobQueue_;
 	}
 	
 	public abstract void quit(Player p) throws Exception;

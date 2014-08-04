@@ -1,13 +1,13 @@
 package net.iizs.genius.server;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Collection;
+
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-import java.util.Set;
+
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,7 +21,6 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
-import static net.iizs.genius.server.Constants.*;
 
 public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
 
@@ -54,16 +53,18 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
 
 		@Override
 		public void run() {
-			// TODO
 			try {
-				//logger_.info("[" + nick_ + "](admin)@" + room_.getName() + " " + cmd_);
-				//room_.userCommand(nick_, cmd_);
+				logger_.info( player_.toString() + "(admin)@ " + currentGame_.getName() + cmd_ );
+				room_.userCommand(player_, parseCommand(cmd_));
 			} catch ( Exception e ) {
-				//logger_.warning("[" + nick_ + "](admin)@" + room_.getName() + " " + cmd_);
-				
+				logger_.warning( e.getMessage() );
 			}
-			
 		}
+    }
+    
+    public void queueCommand(String c, long delay) {
+    	ScheduledJob job = new ScheduledJob(currentGame_, player_, c);
+		jobScheduler.schedule(job, delay);
     }
     
     public String getMessage(String key) {
@@ -324,12 +325,11 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
     
     @Override
 	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-    	// TODO
 		super.channelInactive(ctx);
 		if ( currentGame_ == null ) {
 			lobbyBroadcast( getMessage("exitLobby", player_.getId() ) );
 		} else {
-			//currentGame_.quit(nickname_);
+			currentGame_.quit(player_);
 		}
 		logger_.info(player_.toString() + " disconnected");
 		// TODO 새로운 스펙에 맞도록 수정 필요
@@ -394,17 +394,6 @@ public class GeniusServerHandler extends SimpleChannelInboundHandler<String> {
 	    				
 	    				if ( commonCommand( ctx, cmds ) == false ) {
 	    					currentGame_.userCommand(player_, cmds);
-	    				}
-	    				
-	    				// TODO attack state 에서 시간제한을 두기 위해 사용했음. 
-	    				// 하지만 이제는 server instance 가 state instance 에 전파되므로, 
-	    				// state에서 직접 server의 schedule 함수를 호출하는 방식도 가능할 것 같음
-	    				// 특히 현 방식은 플레이어중 최소 1명이 명령을 내려야만 진행이 가능한 구조라는 문제점도 있음
-	    				// 위와 같이 변경하면 해당 문제도 해결 가능할 듯
-	    				while ( ! currentGame_.getJobQueue().isEmpty() ) {
-	    					ScheduleRequest req = currentGame_.getJobQueue().poll();
-	    					ScheduledJob job = new ScheduledJob(currentGame_, player_, req.getCommand());
-	    					jobScheduler.schedule(job, req.getDelay());
 	    				}
 	    			} catch ( GeniusServerException e ) {
 	    				ctx.channel().writeAndFlush( formatter_.formatErrorMessage( e.getMessage() ) );

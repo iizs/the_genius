@@ -1,7 +1,5 @@
 package net.iizs.genius.server;
 
-import java.util.concurrent.ConcurrentLinkedQueue;
-
 import net.iizs.genius.server.foodchain.FoodChainWaitState;
 
 public class GameRoom implements Comparable<GameRoom> {
@@ -48,10 +46,6 @@ public class GameRoom implements Comparable<GameRoom> {
 	
 	public void userCommand(Player p, String[] cmds) throws Exception {
     	state_ = state_.userCommand(p, cmds);
-	}
-
-	public ConcurrentLinkedQueue<ScheduleRequest> getJobQueue() {
-		return state_.getJobQueue();
 	}
 
 	@Override

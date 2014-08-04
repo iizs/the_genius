@@ -1,7 +1,6 @@
 package net.iizs.genius.server.foodchain;
 
 import static net.iizs.genius.server.foodchain.FoodChainConstants.*;
-import static net.iizs.genius.server.Constants.NEWLINE;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -12,6 +11,7 @@ import java.util.logging.Logger;
 
 import net.iizs.genius.server.GeniusServerHandler;
 import net.iizs.genius.server.GeniusServerException;
+import net.iizs.genius.server.KeyValueResponse;
 import net.iizs.genius.server.Player;
 import net.iizs.genius.server.ScheduleRequest;
 import net.iizs.genius.server.SimpleResponse;
@@ -294,37 +294,60 @@ public class FoodChainAttackState extends AbstractFoodChainState {
 		player.getChannel().writeAndFlush(getFormatter().formatResponseMessage(
 				new SimpleResponse(getMessage("usageAttackStateSimple"))));
 	}
+	
+	private String movesToString(List<FoodChainArea> moves) {
+		String s = "[";
+		for ( int i = 0; i < round_ ; ++i ) {
+			if ( i != 0 ) {
+				s += "->";
+			}
+			s += getName(moves.get(i));
+		}
+		s += "]";
+		return s;
+	}
 
 	@Override
 	public void showInfo(Player player) throws Exception {
-		FoodChainPlayer p = getFoodChainPlayer(player.getId());
+		KeyValueResponse<String, String> resp = new KeyValueResponse<>("");
 		
-		p.getChannel().write( "> 방 번호: " + getName() + NEWLINE );
-		//p.getChannel().write( "> 관리자암호: " + adminPassword_ + NEWLINE );
-		p.getChannel().write( "> 플레이어" + NEWLINE );
+		resp.put( getMessage("iRoomName"), getName() );
+		resp.put( getMessage("iRound"), Integer.toString(round_) );
 		
-    	Set<String> playerNames = getAllPlayers().keySet();
+		Set<String> playerNames = getAllPlayers().keySet();
+    	int cntP = 1;
+    	int cntB = 1;
     	Iterator<String> iter = playerNames.iterator();
-    	while ( iter.hasNext() ) {    		
-    		FoodChainPlayer i = getFoodChainPlayer(iter.next());
-    		
-    		p.getChannel().write("> [" + i.getId() + "]");
-    		if ( i.isBot() ) {
-    			p.getChannel().write( " (Bot)");
+    	while ( iter.hasNext() ) {
+    		FoodChainPlayer p = getFoodChainPlayer(iter.next());
+    		if ( ! p.isBot() ) {
+    			String s = p.getId() 
+    					+ "(" + ( p.isAlive() ? getMessage("iLive") : getMessage("iDead") ) + ")"
+    					+ movesToString(p.getMoves()) ;
+    			resp.put( getMessage("iPlayerN", cntP), s );
+    			++cntP;
     		}
-    		p.getChannel().write(": ");
-    		p.getChannel().write( i.getMoves().subList(0, round_ - 1).toString() );
-    		p.getChannel().write(": " + ( i.isAlive() ? "생존" : "죽음" ) );
-    		p.getChannel().write( NEWLINE );
     	}
     	
-    	p.getChannel().write( getName( FoodChainArea.PLAINS ) + ": " + minimap_.get(FoodChainArea.PLAINS).toString() + NEWLINE );
-    	p.getChannel().write( getName( FoodChainArea.WOODS ) + ": " + minimap_.get(FoodChainArea.WOODS).toString() + NEWLINE );
-    	p.getChannel().write( getName( FoodChainArea.SKY ) + ": " + minimap_.get(FoodChainArea.SKY).toString() + NEWLINE );
-		p.getChannel().write( getName( FoodChainArea.RIVER ) + ": " + minimap_.get(FoodChainArea.RIVER).toString() + NEWLINE  );
+    	iter = playerNames.iterator();
+    	while ( iter.hasNext() ) {
+    		FoodChainPlayer p = getFoodChainPlayer(iter.next());
+    		if ( p.isBot() ) {
+    			String s = p.getId() 
+    					+ "(" + ( p.isAlive() ? getMessage("iLive") : getMessage("iDead") ) + ")"
+    					+ movesToString(p.getMoves()) ;
+    			resp.put( getMessage("iBotN", cntB), s );
+    			++cntB;
+    		}
+    	}
     	
-    	p.getChannel().flush();
+    	for ( FoodChainArea area : minimap_.keySet() ) {
+    		resp.put( getName( area ), minimap_.get(area).toString() );
+    	}
+    	
+		player.getChannel().writeAndFlush( getFormatter().formatResponseMessage(resp));
 	}
+	
 	
 	@Override
 	public void chat(Player player, String msg) throws Exception {

@@ -157,7 +157,7 @@ public class FoodChainAttackState extends AbstractFoodChainState {
 				//broadcast("");
 				for ( Player ap: getAllPlayers().values() ) {
 					FoodChainPlayer p = (FoodChainPlayer) ap;
-					broadcast( "[" + p.getId() + "] = '" + p.getCharacter().getName() + "'" );
+					broadcast( "[" + p.getId() + "] = '" + getName( p.getCharacter() ) + "'" );
 				}
 				//broadcast("");
 				broadcast( getMessage("winner", winner.toString() ) );

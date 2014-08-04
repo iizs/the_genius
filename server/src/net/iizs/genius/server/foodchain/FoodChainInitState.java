@@ -30,6 +30,7 @@ public class FoodChainInitState extends AbstractFoodChainState {
 		
 		herbivores_ = new HashSet<FoodChainPlayer>();
 		charmap_ = new HashMap<FoodChainCharacter,FoodChainPlayer>();
+		charNameMap_ = new HashMap<String, FoodChainCharacter>();
 		
 		List<FoodChainCharacter> chars = Arrays.asList( FoodChainCharacter.values() );
 		Collections.shuffle( chars );
@@ -44,6 +45,7 @@ public class FoodChainInitState extends AbstractFoodChainState {
 			p.setCurrentArea( FoodChainArea.HALL );
 			minimap_.get( FoodChainArea.HALL ).add(p);
 			charmap_.put(c, p);
+			charNameMap_.put( getName(c), c );
 			
 			if ( c.equals(FoodChainCharacter.MALLARD)
 					|| c.equals(FoodChainCharacter.RABBIT)
@@ -55,12 +57,12 @@ public class FoodChainInitState extends AbstractFoodChainState {
 			if ( ! p.isBot() ) {
 				p.getChannel().writeAndFlush( getFormatter().formatGameRoomMessage( 
 						getMessage( "characterGuide"
-								, c.getName()
+								, getName(c)
 								, getMessage( c.getHabitat().getId() )
 								, ( c.isFlyable() ? ", " + getName( FoodChainArea.SKY ) : "" )
-								, c.winningCondition()
-								, c.losingCondition()
-								, c.note()
+								, getMessage( c.winningConditionMessageId() )
+								, getMessage( c.losingConditionMessageId() )
+								, getMessage( c.noteMessageId() )
 								) ) );
 			}
 		}
@@ -117,7 +119,7 @@ public class FoodChainInitState extends AbstractFoodChainState {
 						}
 						
 						p.getChannel().writeAndFlush( getFormatter().formatResponseMessage(
-								new SimpleResponse( getMessage("peepResult", n, c.getName()))) );
+								new SimpleResponse( getMessage("peepResult", n, getName(c)))) );
 					}
 				}
 			}
@@ -167,15 +169,15 @@ public class FoodChainInitState extends AbstractFoodChainState {
     			printUsage( player );
     		} else {	
 	    		if ( c.equals(FoodChainCharacter.CROW) ) {
-	    			p.setSelection( FoodChainCharacter.getCharacterOf( cmds[1] ) );
+	    			p.setSelection( getCharacterOf( cmds[1] ) );
 	    			p.getChannel().writeAndFlush(getFormatter().formatResponseMessage(
 		    				new SimpleResponse( getMessage( "winnerSelected", cmds[1] ) ) ) );
 	    		} else if ( c.equals(FoodChainCharacter.CHAMELEON) ) {
-	    			p.setSelection( FoodChainCharacter.getCharacterOf( cmds[1] ) );
+	    			p.setSelection( getCharacterOf( cmds[1] ) );
 	    			p.getChannel().writeAndFlush( getFormatter().formatResponseMessage(
 		    				new SimpleResponse( getMessage( "disguiseSelected", cmds[1] ) ) ) );
 	    		} else {
-	    			throw new GeniusServerException( getMessage("eSelectionNotAllowed", c.getName() ) );
+	    			throw new GeniusServerException( getMessage("eSelectionNotAllowed", getName(c) ) );
 	    		}
     		}
     	} else if ( cmd.equals("/to") ) {

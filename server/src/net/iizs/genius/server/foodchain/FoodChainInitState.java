@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.Set;
 
 import net.iizs.genius.server.GeniusServerException;
+import net.iizs.genius.server.KeyValueResponse;
 import net.iizs.genius.server.Player;
-import static net.iizs.genius.server.foodchain.FoodChainConstants.*;
-import static net.iizs.genius.server.Constants.NEWLINE;
+import net.iizs.genius.server.SimpleResponse;
 
 public class FoodChainInitState extends AbstractFoodChainState {
 
@@ -22,11 +22,15 @@ public class FoodChainInitState extends AbstractFoodChainState {
 		round_ = 0;
 		kills_ = 0;
 		minimap_ = new HashMap<FoodChainArea,List<FoodChainPlayer>>();
+		areaNameMap_ = new HashMap<String,FoodChainArea>();
 		for ( FoodChainArea a : FoodChainArea.values() ) {
 			minimap_.put(a, new ArrayList<FoodChainPlayer>());
+			areaNameMap_.put( getName(a), a );
 		}
+		
 		herbivores_ = new HashSet<FoodChainPlayer>();
 		charmap_ = new HashMap<FoodChainCharacter,FoodChainPlayer>();
+		charNameMap_ = new HashMap<String, FoodChainCharacter>();
 		
 		List<FoodChainCharacter> chars = Arrays.asList( FoodChainCharacter.values() );
 		Collections.shuffle( chars );
@@ -41,6 +45,7 @@ public class FoodChainInitState extends AbstractFoodChainState {
 			p.setCurrentArea( FoodChainArea.HALL );
 			minimap_.get( FoodChainArea.HALL ).add(p);
 			charmap_.put(c, p);
+			charNameMap_.put( getName(c), c );
 			
 			if ( c.equals(FoodChainCharacter.MALLARD)
 					|| c.equals(FoodChainCharacter.RABBIT)
@@ -50,21 +55,19 @@ public class FoodChainInitState extends AbstractFoodChainState {
 			}
 			
 			if ( ! p.isBot() ) {
-				p.getChannel().writeAndFlush(">>> 당신은 '" + c.getName() + "' 입니다." + NEWLINE );
-				p.getChannel().writeAndFlush(">>> 주서식지: " + c.getHabitat().getName() + NEWLINE );
-				p.getChannel().writeAndFlush(">>> 이동가능: 들, 숲, 강" + ( c.isFlyable() ? ", 하늘" : "" ) + NEWLINE );
-				p.getChannel().writeAndFlush(">>> 승리조건: " + c.winningCondition() + NEWLINE );
-				p.getChannel().writeAndFlush(">>> 패배조건: " + c.losingCondition() + NEWLINE );
-				p.getChannel().writeAndFlush(">>> 특이사항: " + c.note() + NEWLINE );
+				p.getChannel().writeAndFlush( getFormatter().formatGameRoomMessage( 
+						getMessage( "characterGuide"
+								, getName(c)
+								, getMessage( c.getHabitat().getId() )
+								, ( c.isFlyable() ? ", " + getName( FoodChainArea.SKY ) : "" )
+								, getMessage( c.winningConditionMessageId() )
+								, getMessage( c.losingConditionMessageId() )
+								, getMessage( c.noteMessageId() )
+								) ) );
 			}
 		}
 		
-		broadcast("각 플레이어들은 /peep [닉네임] 명령으로 엿보기를 실행해주세요.");
-		broadcast("2회 엿보기가 가능한 플레이어들은 /peep 명령을 두 번 실행하시면 됩니다.");
-		broadcast("'까마귀'는 /select [동물이름] 명령으로 우승자를 지목해 주세요.");
-		broadcast("'카멜레온'은 /select [동물이름] 명령으로 위장할 동물을 선택해주세요.");
-		broadcast("엿보기 결과는 모든 플레이어가 각자의 명령을 실행한 다음 동시에 공개됩니다.");
-		
+		broadcast( getMessage("initStateGuide") );	
 	}
 	
 	private AbstractFoodChainState proceed() throws Exception {
@@ -115,7 +118,8 @@ public class FoodChainInitState extends AbstractFoodChainState {
 							c = getFoodChainPlayer(n).getSelection();
 						}
 						
-						p.getChannel().writeAndFlush(">>> [" + n + "]님은 '" + c.getName() + "' 입니다." + NEWLINE );
+						p.getChannel().writeAndFlush( getFormatter().formatResponseMessage(
+								new SimpleResponse( getMessage("peepResult", n, getName(c)))) );
 					}
 				}
 			}
@@ -126,79 +130,99 @@ public class FoodChainInitState extends AbstractFoodChainState {
 	}
 
 	@Override
-	public synchronized AbstractFoodChainState userCommand(String nickname, String req) throws Exception {
-		String cmds[] = req.split("\\s+", 3);
+	public synchronized AbstractFoodChainState userCommand(Player player, String[] cmds) throws Exception {
+		//String cmds[] = req.split("\\s+", 3);
     	String cmd = cmds[0].toLowerCase();
     	
     	if ( cmd.equals("/peep") ) {
-    		FoodChainPlayer p = getFoodChainPlayer(nickname);
+    		FoodChainPlayer p = getFoodChainPlayer(player.getId());
     		if ( cmds.length < 2 ) {
-    			throw new GeniusServerException("플레이어 닉네임을 지정해야 합니다.");
-    		}
-    		
-    		p.addPeep(getPlayer(cmds[1]).getNickname());
-    		
-    		p.getChannel().writeAndFlush(">>> [" + cmds[1] + "]님을 엿보기로 설정하셨습니다." + NEWLINE );
-    		
-    		if ( p.getCharacter().getPeepingCount() != p.getPeeps().size() ) {
-    			p.getChannel().writeAndFlush(">>> 엿보기 횟수가 " + ( p.getCharacter().getPeepingCount() - p.getPeeps().size() ) + "회 남아 있습니다." + NEWLINE );
+    			printUsage( player );
     		} else {
-    			p.getChannel().writeAndFlush(">>> 엿보기 설정이 완료되었습니다;" + p.getPeeps().toString() + NEWLINE );
+    			try {
+    				p.addPeep( getPlayer(cmds[1]).getId());
+    			} catch ( NoMorePeepAllowedException e ) {
+    				throw new GeniusServerException( getMessage( "eNoMorePeepAllowed", p.getPeeps().toString() ) );
+    			} catch ( CannotPeepYourselfException e ) {
+    				throw new GeniusServerException( getMessage( "eCannotPeepYourself", p.getPeeps().toString() ) );
+    			}
+	    		
+	    		p.getChannel().writeAndFlush( getFormatter().formatResponseMessage(
+	    				new SimpleResponse( getMessage( "peepSet", cmds[1] ) ) ) );
+	    		
+	    		if ( p.getCharacter().getPeepingCount() != p.getPeeps().size() ) {
+	    			p.getChannel().writeAndFlush( getFormatter().formatResponseMessage(
+		    				new SimpleResponse( 
+		    						getMessage( "peepRemains", 
+		    								p.getCharacter().getPeepingCount() - p.getPeeps().size() ) ) ) );
+	    		} else {
+	    			p.getChannel().writeAndFlush( getFormatter().formatResponseMessage(
+		    				new SimpleResponse( getMessage( "peepComplete", p.getPeeps().toString() ) ) ) );
+	    		}
     		}
     		
     	} else if ( cmd.equals("/select") ) {
-    		FoodChainPlayer p = getFoodChainPlayer(nickname);
+    		FoodChainPlayer p = getFoodChainPlayer(player.getId());
     		FoodChainCharacter c = p.getCharacter();
     		
     		if ( cmds.length < 2 ) {
-    			throw new GeniusServerException("동물이름을 지정해야 합니다.");
-    		}
-    		
-    		if ( c.equals(FoodChainCharacter.CROW) ) {
-    			p.setSelection( FoodChainCharacter.getCharacterOf( cmds[1] ) );
-    			p.getChannel().writeAndFlush(">>> '" + cmds[1] + "'을 우승자로 예상하셨습니다." + NEWLINE );
-    		} else if ( c.equals(FoodChainCharacter.CHAMELEON) ) {
-    			p.setSelection( FoodChainCharacter.getCharacterOf( cmds[1] ) );
-    			p.getChannel().writeAndFlush(">>> '" + cmds[1] + "'로 위장하셨습니다." + NEWLINE );
-    		} else {
-    			throw new GeniusServerException("'" + c.getName() + "'는 이 명령을 실행할 수 없습니다.");
+    			printUsage( player );
+    		} else {	
+	    		if ( c.equals(FoodChainCharacter.CROW) ) {
+	    			p.setSelection( getCharacterOf( cmds[1] ) );
+	    			p.getChannel().writeAndFlush(getFormatter().formatResponseMessage(
+		    				new SimpleResponse( getMessage( "winnerSelected", cmds[1] ) ) ) );
+	    		} else if ( c.equals(FoodChainCharacter.CHAMELEON) ) {
+	    			p.setSelection( getCharacterOf( cmds[1] ) );
+	    			p.getChannel().writeAndFlush( getFormatter().formatResponseMessage(
+		    				new SimpleResponse( getMessage( "disguiseSelected", cmds[1] ) ) ) );
+	    		} else {
+	    			throw new GeniusServerException( getMessage("eSelectionNotAllowed", getName(c) ) );
+	    		}
     		}
     	} else if ( cmd.equals("/to") ) {
-    		whisper(nickname, cmds[1], cmds[2]);
+    		whisper(player, cmds[1], cmds[2]);
     	} else if ( cmd.equals("/info") ) {
-    		showInfo( nickname );
-    	} else {
-    		printUsageSimple(nickname);
-    	}
+    		showInfo( player );
+    	} 
     	
     	return proceed();
 	}
 
 	@Override
-	public void printUsageSimple(String nickname) throws Exception {
-		getPlayer(nickname).getChannel().writeAndFlush(INIT_USAGE_SIMPLE + NEWLINE);
+	public void printUsage(Player p) throws Exception {
+		p.getChannel().writeAndFlush(getFormatter().formatResponseMessage(
+				new SimpleResponse(getMessage("usageInitStateSimple"))));
 	}
 
 	@Override
-	public void showInfo(String nickname) throws Exception {
-		FoodChainPlayer p = getFoodChainPlayer(nickname);
+	public void showInfo(Player player) throws Exception {
+		KeyValueResponse<String, String> resp = new KeyValueResponse<>("");
 		
-		p.getChannel().write( "> 방 번호: " + getName() + NEWLINE );
-		p.getChannel().write( "> 플레이어" + NEWLINE );
+		resp.put( getMessage("iRoomName"), getName() );
 		
-    	Set<String> playerNames = getAllPlayers().keySet();
+		Set<String> playerNames = getAllPlayers().keySet();
+    	int cntP = 1;
+    	int cntB = 1;
     	Iterator<String> iter = playerNames.iterator();
-    	while ( iter.hasNext() ) {    		
-    		FoodChainPlayer i = getFoodChainPlayer(iter.next());
-    		
-    		p.getChannel().write("> [" + i.getNickname() + "]");
-    		if ( i.isBot() ) {
-    			p.getChannel().write( " (Bot)");
+    	while ( iter.hasNext() ) {
+    		FoodChainPlayer p = getFoodChainPlayer(iter.next());
+    		if ( ! p.isBot() ) {
+    			resp.put( getMessage("iPlayerN", cntP), p.getId() );
+    			++cntP;
     		}
-    		p.getChannel().write( NEWLINE );
     	}
     	
-    	p.getChannel().flush();
+    	iter = playerNames.iterator();
+    	while ( iter.hasNext() ) {
+    		FoodChainPlayer p = getFoodChainPlayer(iter.next());
+    		if ( p.isBot() ) {
+    			resp.put( getMessage("iBotN", cntB), p.getId() );
+    			++cntB;
+    		}
+    	}
+    	
+		player.getChannel().writeAndFlush( getFormatter().formatResponseMessage(resp));
 	}
 
 }

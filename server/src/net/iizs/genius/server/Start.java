@@ -12,11 +12,11 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
  * @author iizs
  *
  */
-public class FoodChainServer {
+public class Start {
 	
 	private final int port;
 	
-	public FoodChainServer(int port) {
+	public Start(int port) {
         this.port = port;
     }
 	
@@ -27,7 +27,7 @@ public class FoodChainServer {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)
              .channel(NioServerSocketChannel.class)
-             .childHandler(new FoodChainServerInitializer());
+             .childHandler(new GeniusServerInitializer());
 
             b.bind(port).sync().channel().closeFuture().sync();
         } finally {
@@ -47,7 +47,7 @@ public class FoodChainServer {
         } else {
             port = 8080;
         }
-        new FoodChainServer(port).run();
+        new Start(port).run();
 	}
 
 }

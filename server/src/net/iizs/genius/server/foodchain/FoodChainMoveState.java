@@ -1,24 +1,21 @@
 package net.iizs.genius.server.foodchain;
 
-import static net.iizs.genius.server.foodchain.FoodChainConstants.*;
-import static net.iizs.genius.server.Constants.NEWLINE;
-
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import net.iizs.genius.server.GeniusServerException;
+import net.iizs.genius.server.KeyValueResponse;
 import net.iizs.genius.server.Player;
+import net.iizs.genius.server.SimpleResponse;
 
 public class FoodChainMoveState extends AbstractFoodChainState {
 	public FoodChainMoveState(AbstractFoodChainState cl) {
 		super(cl);
 		
 		++round_;
-				
-		broadcast("각 플레이어들은 /move [지역] 명령으로 " + round_ + " 라운드에 이동할 지역을 선택해주세요.");
-		broadcast("주 서식지로 이동하셔야만 하는 분들도 반드시 이동 명령을 내려주세요.");
-		broadcast("다만, 다른 곳으로 이동하도록 설정하셔도 강제로 주 서식지로 이동합니다.");
-		broadcast("이동 결과는 모든 플레이어가 각자의 명령을 실행한 다음 동시에 공개 됩니다.");
+		
+		broadcast( getMessage("moveStateGuide", round_ ) );
 	}
 	
 	private AbstractFoodChainState proceed() throws Exception {
@@ -39,7 +36,7 @@ public class FoodChainMoveState extends AbstractFoodChainState {
 			// 봇들의 선택을 랜덤으로 추가
 			for ( Player ap: getAllPlayers().values() ) {
 				FoodChainPlayer p = (FoodChainPlayer) ap;
-				if ( p.isBot() ) {
+				if ( p.isBot() && p.isAlive() ) {
 					p.addMove(round_, p.getCharacter().getHabitat());
 				}
 			}
@@ -59,7 +56,7 @@ public class FoodChainMoveState extends AbstractFoodChainState {
 			for ( Player ap: getAllPlayers().values() ) {
 				FoodChainPlayer p = (FoodChainPlayer) ap;
 				if ( ! p.isAlive() ) continue;
-				broadcast( "[" + p.getNickname() + "]님은 '" + p.getMoves().get( round_ - 1 ).getName() + "'으로 이동했습니다.");
+				broadcast( getMessage( "moveResult", p.getId(), getName( p.getMoves().get( round_ - 1 ) ) ) );
 			}
 			
 			return new FoodChainAttackState(this);
@@ -69,99 +66,121 @@ public class FoodChainMoveState extends AbstractFoodChainState {
 	}
 
 	@Override
-	public synchronized AbstractFoodChainState userCommand(String nickname, String req)
+	public synchronized AbstractFoodChainState userCommand(Player player, String[] cmds)
 			throws Exception {
-		String cmds[] = req.split("\\s+", 3);
     	String cmd = cmds[0].toLowerCase();
     	
     	if ( cmd.equals("/move") ) {
-    		FoodChainPlayer p = getFoodChainPlayer(nickname);
+    		FoodChainPlayer p = getFoodChainPlayer(player.getId());
     		
     		if ( cmds.length < 2 ) {
-    			throw new GeniusServerException("이동지역을 지정해야 합니다.");
+    			printUsage(player);
+    		} else {
+    			if ( ! p.isAlive() ) {
+    				throw new GeniusServerException( getMessage("eYouAreDead") );
+    			}
+    		
+	    		if ( cmds[1].equals( getName( FoodChainArea.HALL ) ) ) {
+	    			throw new GeniusServerException( getMessage( "eCannotMoveToHall" ) );
+	    		}
+	    		
+	    		if ( cmds[1].equals( getName( FoodChainArea.SKY ) ) && ( ! p.getCharacter().isFlyable() ) ) {
+	    			throw new GeniusServerException( getMessage( "eCannotMoveToSky" ) );
+	    		}
+	    		
+	    		p.addMove(round_, getAreaOf(cmds[1]));
+	    		p.getChannel().writeAndFlush( getFormatter().formatResponseMessage(
+	    				new SimpleResponse( getMessage("moveSet", cmds[1] ) ) ) );
     		}
-    		
-    		if ( cmds[1].equals(FoodChainArea.HALL.getName()) ) {
-    			throw new GeniusServerException(FoodChainArea.HALL.getName() + "으로 직접 이동할 수는 없습니다.");
-    		}
-    		
-    		if ( cmds[1].equals(FoodChainArea.SKY.getName()) && ( ! p.getCharacter().isFlyable() ) ) {
-    			throw new GeniusServerException("당신은 " + FoodChainArea.SKY.getName() + "로 이동할 수 없습니다.");
-    		}
-    		
-    		p.addMove(round_, FoodChainArea.getAreaOf(cmds[1]));
-    		p.getChannel().writeAndFlush(">>> '" + cmds[1] + "'으로 이동하기로 설정하셨습니다." + NEWLINE );
-    		
     	} else if ( cmd.equals("/to") ) {
-    		whisper(nickname, cmds[1], cmds[2]);
+    		whisper(player, cmds[1], cmds[2]);
     	} else if ( cmd.equals("/info") ) {
-    		showInfo( nickname );
-    	} else {
-    		printUsageSimple(nickname);
-    	}
+    		showInfo( player );
+    	} 
     	
     	return proceed();
 	}
 
 	@Override
-	public void printUsageSimple(String nickname) throws Exception {
-		getPlayer(nickname).getChannel().writeAndFlush(MOVE_USAGE_SIMPLE + NEWLINE);
+	public void printUsage(Player player) throws Exception {
+		player.getChannel().writeAndFlush(getFormatter().formatResponseMessage(
+				new SimpleResponse(getMessage("usageMoveStateSimple"))));
+	}
+	
+	private String movesToString(List<FoodChainArea> moves) {
+		String s = "[";
+		for ( int i = 0; i < round_ - 1 && i < moves.size() ; ++i ) {
+			if ( i != 0 ) {
+				s += "->";
+			}
+			s += getName(moves.get(i));
+		}
+		s += "]";
+		return s;
 	}
 
 	@Override
-	public void showInfo(String nickname) throws Exception {
-		FoodChainPlayer p = getFoodChainPlayer(nickname);
+	public void showInfo(Player player) throws Exception {
+		KeyValueResponse<String, String> resp = new KeyValueResponse<>("");
 		
-		p.getChannel().write( "> 방 번호: " + getName() + NEWLINE );
-		p.getChannel().write( "> 플레이어" + NEWLINE );
+		resp.put( getMessage("iRoomName"), getName() );
+		resp.put( getMessage("iRound"), Integer.toString(round_) );
 		
-    	Set<String> playerNames = getAllPlayers().keySet();
+		Set<String> playerNames = getAllPlayers().keySet();
+    	int cntP = 1;
+    	int cntB = 1;
     	Iterator<String> iter = playerNames.iterator();
-    	while ( iter.hasNext() ) {    		
-    		FoodChainPlayer i = getFoodChainPlayer(iter.next());
-    		
-    		p.getChannel().write("> [" + i.getNickname() + "]");
-    		if ( i.isBot() ) {
-    			p.getChannel().write( " (Bot)");
+    	while ( iter.hasNext() ) {
+    		FoodChainPlayer p = getFoodChainPlayer(iter.next());
+    		if ( ! p.isBot() ) {
+    			String s = p.getId() 
+    					+ "(" + ( p.isAlive() ? getMessage("iLive") : getMessage("iDead") ) + ")"
+    					+ movesToString(p.getMoves()) ;
+    			resp.put( getMessage("iPlayerN", cntP), s );
+    			++cntP;
     		}
-    		p.getChannel().write(": ");
-    		p.getChannel().write( i.getMoves().subList(0, round_ - 1).toString() );
-    		p.getChannel().write(": " + ( i.isAlive() ? "생존" : "죽음" ) );
-    		p.getChannel().write( NEWLINE );
     	}
     	
-    	p.getChannel().write( FoodChainArea.PLAINS.getName() + ": " + minimap_.get(FoodChainArea.PLAINS).toString() + NEWLINE );
-    	p.getChannel().write( FoodChainArea.WOODS.getName() + ": " + minimap_.get(FoodChainArea.WOODS).toString() + NEWLINE );
-    	p.getChannel().write( FoodChainArea.SKY.getName() + ": " + minimap_.get(FoodChainArea.SKY).toString() + NEWLINE );
-		p.getChannel().write( FoodChainArea.RIVER.getName() + ": " + minimap_.get(FoodChainArea.RIVER).toString() + NEWLINE  );
+    	iter = playerNames.iterator();
+    	while ( iter.hasNext() ) {
+    		FoodChainPlayer p = getFoodChainPlayer(iter.next());
+    		if ( p.isBot() ) {
+    			String s = p.getId() 
+    					+ "(" + ( p.isAlive() ? getMessage("iLive") : getMessage("iDead") ) + ")"
+    					+ movesToString(p.getMoves()) ;
+    			resp.put( getMessage("iBotN", cntB), s );
+    			++cntB;
+    		}
+    	}
     	
-    	p.getChannel().flush();
+    	for ( FoodChainArea area : minimap_.keySet() ) {
+    		if ( area != FoodChainArea.HALL ) {
+    			resp.put( getName( area ), minimap_.get(area).toString() );
+    		}
+    	}
+    	
+		player.getChannel().writeAndFlush( getFormatter().formatResponseMessage(resp));
 	}
 	
 	@Override
-	public void chat(String nickname, String msg) throws Exception {
-		FoodChainPlayer p = getFoodChainPlayer(nickname);
+	public void chat(Player player, String msg) throws Exception {
+		FoodChainPlayer p = getFoodChainPlayer(player.getId());
         for (FoodChainPlayer to: minimap_.get(p.getCurrentArea())) {
         	if ( to.isBot() ) continue;
-        	to.getChannel().writeAndFlush("[" + nickname + "] " + msg + NEWLINE);
+        	to.getChannel().writeAndFlush( getFormatter().formatChatMessage(p.getId(), msg) );
         }
 	}
 	
 	@Override
-	public void whisper(String nickname, String to, String msg) throws Exception {
+	public void whisper(Player player, String to, String msg) throws Exception {
 		FoodChainPlayer p = getFoodChainPlayer(to);
-		FoodChainPlayer me = getFoodChainPlayer(nickname);
-		
-		if ( p.isBot() ) {
-			throw new GeniusServerException("[" + to + "]님은 봇입니다.");
-		}
+		FoodChainPlayer me = getFoodChainPlayer(player.getId());
 		
 		if ( ! p.getCurrentArea().equals(me.getCurrentArea() ) ) {
-			throw new GeniusServerException("다른 지역에 있는 플레이어에게는 귓속말을 보낼 수 없습니다.");
+			throw new GeniusServerException( getMessage( "eCannotWhisperToOtherArea" ) );
 		}
 		
-		p.getChannel().writeAndFlush(">>> [" + nickname + "]님의 귓속말: " + msg + NEWLINE);
-		me.getChannel().writeAndFlush( ">>> [" + to + "]님께 귓속말을 보냈습니다." + NEWLINE);
+		super.whisper(player, to, msg);
 	}
 
 }
